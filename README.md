@@ -1,8 +1,13 @@
 基于ThinkPHP 5.0框架
 
 辰光客服v1.2.6
-演示地址：http://kefu.linhuaf.cn/platform/passport/login.html 账号admin 密码  admin888
+
+演示地址：http://kefu.linhuaf.cn/platform/passport/login.html
+
+账号admin 密码  admin888
+
 联系QQ：337546746
+
 高仿手机微信聊天界面
 
 增加客服聊天底部是否带有广告
