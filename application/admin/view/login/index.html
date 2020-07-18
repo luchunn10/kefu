@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="/cgwl.ico" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <meta content="telephone=no,email=no" name="format-detection" />
+    <title>{$business['business_name']}</title>
+    <script>
+        HJWEB_ROOT_URL = '{:request()->root()}';
+    </script>
+    <!--加载引用文件 -->
+    {/* 载入框架&插件CSS */}
+    {load href="__libs__/layer/skin/layer.css"/}
+    {load href="__libs__/amaze/css/amazeui.min.css"/}
+    {/* 载入框架&插件JS */}
+    {load href="__libs__/jquery/jquery.min.js"/}
+    {load href="__libs__/layer/layer.js"/}
+    {load href="__libs__/vue/vue.js"/}
+    {load href="__libs__/amaze/js/amazeui.min.js"/}
+    {/* 载入项目 CSS & JS */}
+    {load href="__style__/admin/login.css"/}
+    {load href="__style__/admin/reload.css"/}
+    {load href="__script__/admin/message.js"/}
+    <script type="text/javascript" src="__script__/admin/login.js?v=1.2"></script>
+</head>
+<style>
+    html,body{
+        height:100%;
+    }
+
+    a{
+        color: black;
+    }
+
+    a:hover{
+        color: black;
+    }
+
+    ::-o-clear{
+        display: none;
+    }
+
+    ::-ms-clear{
+        display: none;
+    }
+    ::-ms-reveal{
+        display: none;
+    }
+</style>
+
+<body style="width: 100%;position: relative;">
+<div class="bg-img" style="opacity: 0.3;z-index: 2;background-color: #000">       
+</div>
+<div class="bg-img" style="background-image: url('__image__/admin/B/login-bg.png');background-position: center; " alt=""></div>
+{if condition="!empty($business['logo'])"}
+<img class="login-logo" src="{$business['logo']}">
+{/if}
+<div id="login-container" class="container">
+    <div id="login-title">{$business['business_name']}登录平台</div>
+    <form method="post" action="{$submit}" class="am-form" data-submit data-am-validator>
+        <div class="am-form-group am-form-icon">
+            <input type="text" class="login-input" name="username" placeholder="用户名" minlength="1" maxlength="16" required/>
+        </div>
+        <div id="login-input" class="am-form-group am-form-icon am-form-password">
+            <input type="password" class="login-input" id="password" name="password" placeholder="密码" minlength="6" maxlength="16" required />
+            <img class="eyes" @click="openPassword" src="__image__/admin/B/close-eyes.png" v-if="eyes" alt="">
+            <img class="eyes" @click="openPassword" src="__image__/admin/B/open-eyes.png" v-if="!eyes" alt="">
+        </div>
+        <div class="am-form-group am-form-icon">
+            <input type="text" class="login-input" name="captcha" placeholder="验证码" style="width: 50%;" minlength="4" maxlength="4" required />
+            <img src="{:url('captcha')}" data-captcha="{:url('captcha')}" id="login-captcha" title="不清楚? 点击换一个"/>
+        </div>
+        <input type="hidden" name="business_id" value="{$business_id}">
+        <div class="am-form-group am-margin-bottom-0" style="margin-top: 30px;">
+            <button type="submit" class="am-btn login-btn" id="login-submit">登录</button>
+        </div>
+    </form>
+</div>
+
+
+<div class="footer" style="position: absolute;bottom: 40px;left: 50%;width: 200px;margin-left: -100px; color: #fff;text-align: center;font-size: 16px; z-index: 5;">
+    {if condition="!empty($business['copyright']) || $business['copyright'] != ''"}
+    <div class="footer-text copyright">
+        {$business['copyright']}
+    </div>
+    {/if}
+</div>
+
+</body>
+<script>
+    new Vue({
+        el: '#login-input',
+        data() {
+            return {
+                eyes: true,
+            };
+        },
+        created() {
+        },
+        methods: {
+            openPassword() {
+                if($('#password')[0].type == 'password') {
+                    $('#password')[0].type = 'text';
+                    this.eyes = !this.eyes
+                }else if($('#password')[0].type == 'text') {
+                    $('#password')[0].type = "password";
+                    this.eyes = !this.eyes
+                }
+            }
+        }
+    });
+</script>
+</html>
+

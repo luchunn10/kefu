@@ -1,0 +1,263 @@
+{include file="public/header"/}
+<style>
+  .my-setting {
+    margin: 10px 0px;
+    background: #fff;
+    border-radius: 8px;
+}
+
+.my-setting .head {
+    height: 40px;
+    line-height: 40px;
+    background: #F5FAFF;
+    display: flex;
+    justify-content: space-between;
+    border-radius: 8px;
+}
+
+.my-setting .head .title {
+    padding-left: 16px;
+}
+
+.my-setting .head .action {
+    padding: 0px 15px;
+}
+.my-setting .contents{
+    font-size: 13px;
+    color: #555555;
+}
+
+.copy-js-content{
+    display: block;
+    height: 50px;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    resize: none;
+    background: rgba(240, 240, 240, .8);
+    margin: 5px 0px;
+    font-size: 16px;
+    font-weight: bold;
+}
+#container{
+    padding: 40px;
+}
+.layui-btn.layui-btn-normal{
+    color: #3399ff;
+    background: #ffffff;
+    border: 1px solid #3399ff;
+    height: 32px;
+    line-height: 32px;
+    margin-left: 20px;
+    border-radius: 15px;
+}
+#minjs{
+    padding: 16px;
+    font-size: 14px;
+    color: #ff5c5c;
+}
+#wolive-js , #wechat-mp,#personal{
+    height: 50px;
+    line-height: 30px;
+    padding-left: 16px;
+    margin-bottom: 10px;
+    color: #555555;
+    font-size: 14px;
+    border-radius: 8px;
+    background: #f7f7f7;
+}
+</style>
+<div id="container" >
+    <div class="front">
+        <div class="my-setting">
+                <div class="head">
+                    <div class="title">
+                        部署网页组件（推荐）：网页咨询组件同时支持桌面网站和移动网站，提供强大的用户行为采集能力和系统对接能力
+                    </div>
+                   
+                </div>
+                <br />
+                <div class="contents">
+                    聊天框样式：
+                    <select name="type" id="type" onchange="swith()" style="margin-left:20px;padding: 3px;font-size: 14px;border-radius: 15px;border: 1px solid #e5e3e9;height: 32px;">
+                            <option value="0" selected>标准窗口</option>
+                            <option value="1">迷你窗口</option>
+                          
+                    </select>
+
+                    <button class="layui-btn layui-btn-normal" onclick="build()">生成js</button>
+                    <button id="bulidhtml" class="layui-btn layui-btn-normal" onclick="show()" style="margin-left:10px
+">生成html</button>
+                    <button id="buildwechat" class="layui-btn layui-btn-normal" style="margin-left:10px
+" onclick="buildmp()">生成微信公众号链接</button>
+                    <button id="buildpersonal" class="layui-btn layui-btn-normal" style="margin-left:10px
+" onclick="buildpersonal()">生成我的专属链接</button>
+                </div>
+                <br/>
+
+               <div class="method" >
+                      <div id="codearea" class="hide">
+                          <pre id="wechat-mp" class="copy-js-content hide" style="height: 250px" readonly="">
+                              {volist name='wechat' id='data'}
+                                <span style="color: red">{$data.group_name}:</span><p>{$data.url}</p>
+                              {/volist}
+                          </pre>
+                          <pre id="personal" class="copy-js-content hide" readonly="">
+                              {$personal}
+                          </pre>
+                        <pre id="wolive-js" class="copy-js-content" readonly></pre>
+                        <pre id="frontjs" class="copy-js-content hide" style="height: 250px">
+
+                        &lt;link rel='stylesheet' href='{$web}__style__/index/dianqilai_online.css'>
+                        &lt;div class="dianqilai-form"  id="dianqilai-kefu" >
+                            &nbsp;&nbsp;&lt;i class="dianqilai-icon">&lt;/i>
+                            &nbsp;&nbsp;&lt;form class="dianqilai-item" action="{$action}/index/index/home?visiter_id=&visiter_name=&avatar=&business_id={$business}&groupid=0" method="post" target="_blank" >
+                                &nbsp;&nbsp;&lt;input type="hidden" name="product"  value=''>
+                                &nbsp;&nbsp;&lt;input type="submit" value='在线咨询'>
+                              &nbsp;&nbsp;&lt;/form>
+                        {foreach $class as $v}
+                            &nbsp;&nbsp;&lt;form class="dianqilai-item" action="{$action}/index/index/home?visiter_id=&visiter_name=&avatar=&business_id={$business}&groupid={$v.id}" method="post" target="_blank" >
+                                &nbsp;&nbsp;&lt;input type="hidden" name="product"  value=''>
+                                &lt;input type="submit" value='{$v.groupname}'>
+                               &nbsp;&nbsp;&lt;/form>
+                        {/foreach}
+                        &lt;/div>
+                     </pre>
+                     <pre id="minjs" class="copy-js-content hide" style="height: 280px;color:red;">
+                        如果需要添加自身网站用户数据，则需如下操作：
+                        &lt;script >
+                            &nbsp;&nbsp;dianqilai.visiter_id='';//访客id
+                            &nbsp;&nbsp;dianqilai.visiter_name='';//访客昵称
+                            &nbsp;&nbsp;dianqilai.avatar='';//访客头像绝对路径
+                            &nbsp;&nbsp;dianqilai.product='{}';//json数据字符串
+                        &lt;/script>
+                        /**
+                        格式如下：
+                            {"pid":1,"title":" Apple MacBook Air ","img":"http://www.dianqilai.com/assets/images/pro.jpg","info":"13.3英寸笔记本电脑 银色(2017款Core i5 处理器/8GB内存/128GB闪存 MQD32CH/A)","price":"￥7588.00","url":"http://www.dianqilai.com/demo/index/product1"}
+                         */
+                     </pre>
+
+                   
+                    </div>
+               </div>        
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+var swith=function(){
+
+    $type =$("#type").val();
+    if($type == 0){
+     $("#bulidhtml").removeClass('hide');
+     $("#codearea").addClass('hide');
+     $("#wolive-js").addClass('hide');
+     $("#frontjs").addClass('hide');
+     $("#dianqilai-kefu").remove();
+     $('#buildwechat').removeClass('hide');
+     $('#buildpersonal').removeClass('hide');
+    }else if($type == 1){
+     $("#bulidhtml").addClass('hide');
+     $("#codearea").addClass('hide');
+     $("#wolive-js").addClass('hide');
+     $('#minjs').addClass('hide');
+     $("#dianqilai-kefu").remove();
+     $('#buildwechat').addClass('hide');
+     $('#buildpersonal').addClass('hide');
+    }
+}
+
+var build =function(){
+    $('#wechat-mp').addClass('hide');
+
+    $type =$("#type").val();
+     if($type == 0 ){
+        $("#frontjs").addClass('hide');
+        $.ajax({
+           url:HJWEB_ROOT_URL+'/admin/set/createFrontjs',
+           dataType:'json',
+           success:function(res){
+            if(res.code == 0){
+              layer.msg(res.msg,{icon:1,end:function(){
+                $("#wolive-js").removeClass('hide');
+                $("#codearea").removeClass('hide');
+                $("#minjs").removeClass('hide');
+                var str ='&lt;script src="'+res.data+'">&lt;/script>';
+                $("#wolive-js").html(str);
+                var newstr='<script src="'+res.data+'">';
+                $("#container").append(newstr);
+              }});
+            }else{
+              layer.msg(res.msg,{icon:2});
+            }
+           }
+        });
+     }else if($type == 1){
+
+       $.ajax({
+         url:HJWEB_ROOT_URL+'/admin/set/createMinjs',
+         dataType:'json',
+         success:function(res){
+          if(res.code == 0){
+            layer.msg(res.msg,{icon:1,end:function(){
+              $("#wolive-js").removeClass('hide');
+              $("#codearea").removeClass('hide');
+              $("#frontjs").addClass('hide');
+              $("#minjs").removeClass('hide');
+              var str ='&lt;script src="'+res.data+'"> &lt;/script>';
+              $("#wolive-js").html(str);
+              var newstr='<script src="'+res.data+'">';
+              $("#container").append(newstr);
+            
+            }});
+          }else{
+            layer.msg(res.msg,{icon:2});
+          }
+         }
+       });
+     }
+}
+
+var buildmp = function(){
+    $type =$("#type").val();
+    if($type == 0){
+        $("#codearea").removeClass('hide');
+        $("#frontjs").addClass('hide');
+        $("#wolive-js").addClass('hide');
+        $("#minjs").addClass('hide');
+        $("#personal").addClass('hide');
+        $('#wechat-mp').removeClass('hide');
+    }
+};
+
+var buildpersonal = function () {
+    $type =$("#type").val();
+    if($type == 0){
+        $("#codearea").removeClass('hide');
+        $("#frontjs").addClass('hide');
+        $("#wolive-js").addClass('hide');
+        $("#minjs").addClass('hide');
+        $('#wechat-mp').addClass('hide');
+        $("#personal").removeClass('hide');
+    }
+};
+
+var show =function(){
+    $('#wechat-mp').addClass('hide');
+    $('#personal').addClass('hide');
+   $type =$("#type").val();
+   if($type == 0){
+      $("#codearea").removeClass('hide');
+      $("#wolive-js").addClass('hide');
+      $("#frontjs").removeClass('hide');
+      $("#minjs").addClass('hide');
+      $("#container").append('{$html}');
+   }
+}
+
+
+</script>
+
+{include file="public/footer"/}

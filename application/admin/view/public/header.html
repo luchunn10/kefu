@@ -1,0 +1,735 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>{$seo.business_name}</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Language" content="zh-CN">
+    <link rel="shortcut icon" href="/cgwl.ico"/>
+    <script>
+        HJWEB_ROOT_URL = "{$baseroot?$baseroot:''}";
+    </script>
+    {/* 载入框架&插件CSS */}
+    {load href="__libs__/layer/skin/layer.css"/}
+    {load href="__libs__/amaze/css/amazeui.min.css"/}
+
+    {/* 载入框架&插件JS */}
+    {load href="__libs__/jquery/jquery.min.js"/}
+    {load href="__libs__/jquery/jquery.form.min.js"/}
+    {load href="__libs__/jquery/jquery.cookie.js"/}
+    {load href="__libs__/layer/layer.js"/}
+    {load href="__libs__/amaze/js/amazeui.min.js"/}
+    {load href="__libs__/layui/layui.js"/}
+    {load href="__libs__/layui/css/layui.css"/}
+    {load href="__libs__/bootstrap/bootstrap.min.css"/}
+    {/* 载入项目 CSS & JS */}
+    {load href="__style__/admin/common.css"/}
+    {load href="__style__/admin/reload.css"/}
+    {load href="__script__/admin/functions.js"/}
+    {load href="__style__/admin/index.css"/}
+    {load href="__style__/admin/index_me.css"/}
+    {load href="__style__/admin/set.css"/}
+    {load href="__script__/admin/common_me.js"/}
+    {load href="__libs__/push/pusher.min.js"/}
+    <script src="__libs__/adapter.js"></script>
+
+
+    <script type="application/javascript">
+        var mediaStreamTrack;
+        var WEB_SOCKET_SWF_LOCATION = "__libs__/web_socket/WebSocketMain.swf";
+        var WEB_SOCKET_DEBUG = true;
+        var WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = true;
+
+        var chat_data =Array();
+        var record;
+        var choose_lock = false;
+        var myTitle = document.title;
+        var config ={
+          'app_key':'{$app_key}',
+          'whost':'{$whost}',
+          'value':{$value},
+          'wport':{$wport}
+        }
+
+        function titleBlink(){
+
+        record++;
+
+        if(record === 3){
+             record =1;
+        }
+
+        if(record === 1){
+            document.title='【 】'+myTitle;
+        }
+
+        if(record === 2){
+            document.title='【消息】'+myTitle;
+        }
+
+        if(record > 3){
+              getwaitnum();
+             return;
+        }
+
+          setTimeout("titleBlink()",500);//调节时间，单位毫秒。
+        }
+
+
+        layui.use('element', function () {
+           var element = layui.element;
+        });
+
+        var wolive_connect =function () {
+            pusher = new Pusher('{$app_key}', {
+                encrypted: {$value}
+                , enabledTransports: ['ws']
+                , wsHost: '{$whost}'
+                , {$port}: {$wport}
+                , authEndpoint: HJWEB_ROOT_URL + '/admin/login/auth'
+                ,disableStats: true
+         });
+
+            var web = "{$arr['business_id']}";
+            var dataarr = new Array();
+            var value ="{$arr['service_id']}";
+
+            // 私人频道
+            var channelme = pusher.subscribe("ud" + value);
+            channelme.bind("on_notice", function (data) {
+                if(data.message.type == 'change'){
+                    layer.msg(data.message.msg);
+                }
+                getchat();
+                getwait();
+            });
+
+            channelme.bind("on_chat", function (data) {
+               $.cookie("cu_com",'');
+               layer.msg('该访客被删除');
+               getchat();
+            });
+
+
+            // 公共平道
+
+            var channelall = pusher.subscribe("all" + web);
+            channelall.bind("on_notice", function (data) {
+
+                if({$arr['groupid']} == 0 || {$arr['groupid']} == data.message.groupid){
+                    layer.msg(data.message.msg, {offset: "20px"});
+                }
+
+                if({$arr['groupid']} != data.message.groupid){
+
+                     layer.msg('该用户向其他分组咨询！', {offset: "20px"});
+                }
+
+                  getwait();
+                  getchat();
+
+            });
+
+            var channel =pusher.subscribe("kefu" + value);
+            // 发送一个推送
+            channel.bind("callbackpusher",function(data){
+                $.post("{:url('admin/set/callback','',true,true)}",data,function(res){
+
+                })
+            });
+
+            // 接受视频请求
+            channel.bind("video",function (data) {
+                getchat();
+                var msg = data.message;
+                var cha = data.channel;
+                var cid = data.cid;
+                var avatar =data.avatar;
+                var username =data.username;
+                layer.open({
+                    type: 1,
+                    title: '申请框',
+                    area: ['260px', '160px'],
+                    shade: 0.01,
+                    fixed: true,
+                    btn: ['接受', '拒绝'],
+                    content: "<div style='position: absolute;left:20px;top:15px;'><img src='"+avatar+"' width='40px' height='40px' style='border-radius:40px;position:absolute;left:5px;top:5px;'><span style='width:100px;position:absolute;left:70px;top:5px;font-size:13px;overflow-x: hidden;'>"+username+"</span><div style='width:90px;height:20px;position:absolute;left:70px;top:26px;'>"+msg+"</div></div>",
+                    yes: function () {
+                        layer.closeAll('page');
+                        var str='';
+                        str+='<div class="videos">';
+                        str+='<video id="localVideo" autoplay></video>';
+                        str+='<video id="remoteVideo" autoplay class="hidden"></video></div>';
+
+
+                        layer.open({
+                          type:1
+                          ,title: '视频'
+                          ,shade:0
+                          ,closeBtn:1
+                          ,area: ['440px', '378px']
+                          ,content:str
+                          ,end:function(){
+
+
+                             mediaStreamTrack.getTracks().forEach(function (track) {
+                                track.stop();
+                            });
+
+                          }
+                      });
+                        try{
+                          connenctVide(cid);
+                         }catch(e){
+                             console.log(e);
+                             return;
+                         }
+
+                    },
+                    btn2:function(){
+                        var sid = $('#channel').text();
+                        $.ajax({
+                            url:HJWEB_ROOT_URL+'/admin/set/refuse',
+                            type:'post',
+                            data:{channel:cha}
+                        });
+
+                        layer.closeAll('page');
+                    }
+                });
+            });
+
+            channel.bind('bind-wechat',function(data){
+                layer.open({
+                    content: data.message
+                    ,btn: ['确定']
+                    ,yes: function(index, layero){
+                        location.reload();
+                    }
+                    ,cancel: function(){
+                        return false;
+                    }
+                });
+            });
+
+
+            channel.bind('getswitch',function(data){
+                layer.alert(data.message);
+                getchat();
+            });
+
+            // 接受拒绝视频请求
+            channel.bind("video-refuse",function (data) {
+                layer.alert(data.message);
+                layer.closeAll('page');
+            });
+
+            // 接受消息
+
+            channel.bind("cu-event", function (data) {
+                if("{$voice}" == 'open'){
+                    audioElementHovertree = document.createElement('audio');
+                    audioElementHovertree.setAttribute('src', "{$voice_address}");
+                    audioElementHovertree.setAttribute('autoplay', 'autoplay');
+                }
+
+
+                var debug, portrait,showtime;
+                var cdata = $.cookie("cu_com");
+
+                if (cdata) {
+                    var json = $.parseJSON(cdata);
+                    debug = json.visiter_id;
+                    portrait = json.avatar;
+                } else {
+                    debug = "";
+
+                }
+
+                if($.cookie("time") == ""){
+                    time =data.message.timestamp;
+                    $.cookie("time",time);
+                    var mydate =new Date(time*1000);
+                    showtime =mydate.getHours()+":"+mydate.getMinutes();
+                }else{
+                    time =$.cookie("time");
+                    if((data.message.timestamp - time) >60){
+                        var mydate =new Date(data.message.timestamp*1000);
+                        showtime =mydate.getHours()+":"+mydate.getMinutes();
+                    }else{
+                        showtime ="";
+                    }
+                    $.cookie("time",data.message.timestamp);
+                }
+                var msg = '';
+                msg += '<li class="chatmsg"><div class="showtime">' +showtime+ '</div><div style="position: absolute;left:3px;">';
+                msg += '<img class="my-circle  se_pic" src="' + portrait + '" width="50px" height="50px"></div>';
+                msg += "<div class='outer-left'><div class='customer'>";
+                msg += "<div class='chat-right_triangle'>" + "</div>";
+                msg += "<pre>" + data.message.content + "</pre>";
+                msg += "</div></div>";
+                msg += "</li>";
+
+                if (data.message.visiter_id == debug) {
+                    $(".conversation").append(msg);
+                    getwatch(data.message.visiter_id);
+
+                    var str = data.message.content;
+                    str.replace(/<img [^>]*src=['"]([^'"]+)[^>]*>/gi, function (match, capture) {
+
+                    var pos = capture.lastIndexOf("/");
+                    var value = capture.substring(pos + 1);
+
+                    if (value.indexOf("emo") == 0) {
+                        str = data.message.content;
+                    } else {
+                        str = '[图片]';
+                    }
+                });
+
+                str = str.replace(/<div><a[^<>]+><i>.+?<\/i>.+?<\/a><\/div>/,'[文件]');
+                str = str.replace(/<a[^<>]+>.+?<\/a>/,'[超链接]');
+                str =str.replace(/<img src=['"]([^'"]+)[^>]*>/gi,'[图片]');
+
+                $("#msg" + data.message.channel).html(str);
+
+                var div = document.getElementById("wrap");
+
+                }
+                getnow(data.message);
+                if(div){
+                    div.scrollTop = div.scrollHeight;
+                }
+                $("#notices-icon").removeClass('hide');
+
+            });
+
+
+            // 通知 游客离线
+            channel.bind("logout", function (data) {
+
+                //表示访客离线
+                var cdata = $.cookie("cu_com");
+                var chas;
+                if (cdata) {
+                    var jsondata = $.parseJSON(cdata);
+                    chas = jsondata.channel;
+                }
+
+                if (chas == data.message.chas) {
+                    //头像变灰
+                    $("#v_state").text("离线");
+                }
+
+                $("#img" + data.message.chas).addClass("icon_gray");
+                getchat();
+
+            });
+
+            channel.bind("geton", function (data) {
+
+                //表示访客在线
+                var cdata = $.cookie("cu_com");
+                var chas;
+                if (cdata) {
+                    var jsondata = $.parseJSON(cdata);
+                    chas = jsondata.channel;
+                }
+                if (chas == data.message.chas) {
+                    //头像变亮
+                    $("#img" + data.message.chas).removeClass("icon_gray");
+                    $("#v_state").text("在线");
+                }
+
+                $("#img" + data.message.chas).removeClass("icon_gray");
+                getchat();
+
+            });
+
+            pusher.connection.bind('state_change', function(states) {
+
+                if(states.current == 'unavailable' || states.current == "disconnected" || states.current == "failed" ){
+
+                        pusher.unsubscribe("kefu" + value);
+                        pusher.unsubscribe("all" + web);
+                        pusher.unsubscribe("ud" + value);
+
+                    if (typeof pusher.isdisconnect == 'undefined') {
+                     pusher.isdisconnect = true;
+
+                     pusher.disconnect();
+                     delete pusher;
+
+                      window.setTimeout(function(){
+                         wolive_connect();
+                      },1000);
+                    }
+
+
+                    $(".profile").text('离线');
+                }
+            });
+
+            pusher.connection.bind('connected', function() {
+                $(".profile").text('在线');
+            });
+        }
+
+
+        function showpage(obj){
+
+            var value =$(obj).attr("name");
+            var key =$(obj).attr("id");
+            layer.tips(value, '#'+key,{tips: [4, '#2F4050']});
+        }
+
+
+
+    </script>
+
+    <script type="text/javascript" src="__libs__/web_socket/swfobject.js"></script>
+    <script type="text/javascript" src="__libs__/web_socket/web_socket.js"></script>
+    <script type="text/javascript" src="__script__/admin/online.js?v=1.5"></script>
+    
+</head>
+<style type="text/css">
+
+    #group-menus-main li{
+        display: block;
+        width: 100%;
+        height: 50px;
+        line-height: 25px;
+        padding-left: 13px;
+    }
+
+    a:hover {
+        text-decoration: none;
+        color: #858684;
+    }
+
+    a {
+        color: #858684;
+    }
+
+    .info{
+        position: absolute;
+        left:40%;
+    }
+
+    #notices-icon{
+        display: inline-block;
+        width: 15px;
+        height: 15px;
+        background: url("__image__/admin/notice.png") no-repeat;
+        background-size:100%;
+        position: absolute;
+        left:30px;
+        top: 8px;
+        z-index: 9990;
+    }
+
+    .notices {
+        position: absolute;
+        right: 30px;
+        top: 5px;
+        z-index: 9990;
+        background-color: #ff5c5c;
+        color: #fff;
+        height: 16px;
+        line-height: 16px;
+        border-radius: 8px;
+        padding: 0 5px;     
+    }
+
+    .notices-icon {
+        position: absolute;
+        right: 26px;
+        top: 8px;
+        z-index: 9990;
+        background-color: #ff5c5c;
+        border-radius: 5px;
+        padding: 5px;  
+    }
+
+   #group-menus-main i{
+        font-size: 20px;
+   }
+
+    .no_chats-pic {
+        display: inline-block;
+        width: 138px;
+        height: 67px;
+        background: url('__image__/admin/bgspirt.png') no-repeat;
+        background-position: -286px;
+        position: absolute;
+        top: 300px;
+        left: 250px;
+    }
+
+    .no_history_icon {
+        display: inline-block;
+        width: 90px;
+        height: 67px;
+        background: url('__image__/admin/bgspirt.png') no-repeat;
+        background-position: -90px;
+        position: absolute;
+        top: 300px;
+        left: 44%;
+    }
+
+    #se{
+        padding-left: 10px;
+        font-size: 14px;
+        color: #ffffff;
+    }
+</style>
+<body>
+
+
+
+<div id="layout-west"  >
+    <div id="layout-menus">
+        <div id="layout-menus-info">
+            <a style="width: 150px;height: 70px;" href="javascript:;">
+                <img src="{$seo['logo'] ? $seo['logo'] :'__image__/index/workerman_logo.png'}" alt="..." class="am-circle" style="float: left;margin-right: 10px;" width="40px" height="40px">
+                <!-- <span style="color: #fff;font-weight: bold;font-size: 16px;margin-left: 10px;">Wolive客服</span> -->
+                <span class="info hide" style="color: #ffffff;font-size: 16px;width: 75%;height: 40px;vertical-align:middle;display:table-cell;position: static;left: 0">{$seo.business_name}</span>
+            </a>
+
+        </div>
+
+        <div id="layout-menus-lists">
+
+            <ul id="group-menus-main" class="group-menus am-list ">
+                {if $part == "首页" }
+                <li class="menu-item" id="title1" onmouseover="showpage(this)" name="首页" style="background: #ffffff;color: #353535">
+                    <a  href="{:url('admin/index/index')}" >
+                        <img src="__image__/admin/B/index-active.png" alt=""><span style="color: #353535" class="info hide">首页</span>
+                    </a>
+                </li>
+                {else}
+                <li class="menu-item" id="title1" onmouseover="showpage(this)" name="首页" >
+                    <a  href="{:url('admin/index/index')}" >
+                        <img src="__image__/admin/B/index.png" alt=""><span style="color: #fff" class="info hide">首页</span>
+                    </a>
+                </li>
+
+                {/if}
+
+                {if $part == "对话平台" }
+                <li class="menu-item" id="title2" onmouseover="showpage(this)" name="对话平台" style="background:#ffffff;color: #353535">
+                    <span class="notices hide"></span>
+                    <span class="notices-icon hide"></span>
+                    <a  href="{:url('admin/index/chats')}" >
+                        <img src="__image__/admin/B/chat-active.png" alt=""><span style="color: #353535" class="info hide">对话平台</span>
+                    </a>
+                </li>
+                {else}
+                <li class="menu-item" id="title2" onmouseover="showpage(this)" name="对话平台" >
+                    <!-- <i id="notices-icon" class="hide"></i> -->
+                    <span class="notices hide"></span>
+                    <span class="notices-icon hide"></span>
+                    <a  href="{:url('admin/index/chats')}" >
+                        <img src="__image__/admin/B/chat.png" alt=""><span style="color: #fff" class="info hide">对话平台</span>
+                    </a>
+                </li>
+                {/if}
+
+                {if $arr['level'] != 'service'}
+
+                {if $part == "历史记录"}
+                    <li class="menu-item"  id="title7" onmouseover="showpage(this)" name="历史记录" style="background: #ffffff;">
+                        <a href="{:url('admin/manager/view')}">
+                            <img src="__image__/admin/B/history-active.png" alt=""><span style="color: #353535" class="info hide">历史记录</span>
+                        </a>
+                    </li>
+                    {else}
+                    <li class="menu-item"  id="title7" onmouseover="showpage(this)" name="历史记录">
+                        <a href="{:url('admin/manager/view')}">
+                            <img src="__image__/admin/B/history.png" alt=""><span style="color: #fff" class="info hide">历史记录</span>
+                        </a>
+                    </li>
+                {/if}
+
+                {/if}
+
+                {if $part == "客户管理"}
+                    <li class="menu-item"  id="title8" onmouseover="showpage(this)" name="客户管理" style="background: #ffffff;">
+                        <a href="{:url('admin/custom/index')}">
+                            <img src="__image__/admin/B/custom-open.png" alt=""><span style="color: #353535" class="info hide">客户管理</span>
+                        </a>
+                    </li>
+                    {else}
+                    <li class="menu-item"  id="title8" onmouseover="showpage(this)" name="客户管理">
+                        <a href="{:url('admin/custom/index')}">
+                            <img src="__image__/admin/B/custom-close.png" alt=""><span style="color: #fff" class="info hide">客户管理</span>
+                        </a>
+                    </li>
+                {/if}
+
+               {if $part == "网页部署"}
+                <li class="menu-item" id="title9" onmouseover="showpage(this)" name="网页部署" style="background: #ffffff;">
+                    <a href="{:url('admin/index/front')}" >
+                        <img src="__image__/admin/B/web-active.png" alt=""><span style="color: #353535" class="info hide">网页部署</span>
+                    </a>
+                </li>
+
+                {else}
+                <li class="menu-item" id="title9" onmouseover="showpage(this)" name="网页部署">
+                    <a href="{:url('admin/index/front')}" >
+                        <img src="__image__/admin/B/web.png" alt=""><span style="color: #fff" class="info hide">网页部署</span>
+                    </a>
+                </li>
+                {/if}
+
+                {if $part == '设置'}
+                 <li class="menu-item" id="title10" onmouseover="showpage(this)" name="设置" style="background: #ffffff;">
+                    <a href="{:url('admin/index/set')}" >
+                        <img src="__image__/admin/B/setting-active.png" alt=""><span style="color: #353535" class="info hide">设置</span>
+                    </a>
+                 </li>
+                {else}
+                <li class="menu-item" id="title10" onmouseover="showpage(this)" name="设置">
+                  <a href="{:url('admin/index/set')}" >
+                    <img src="__image__/admin/B/setting.png" alt=""><span style="color: #fff" class="info hide">设置</span>
+                  </a>
+                 </li>
+                {/if}
+
+                {if $is_we7 == 1}
+                {if $part == '超级管理'}
+                <li class="menu-item"  id="title11" onmouseover="showpage(this)" name="超级管理" style="background: #ffffff;">
+                    <a href="{:url('manager/index/index')}">
+                        <img src="__image__/admin/B/super-manager-open.png" alt=""><span style="color: #353535" class="info hide">超级管理</span>
+                    </a>
+                </li>
+                {else}
+                <li class="menu-item"  id="title11" onmouseover="showpage(this)" name="超级管理">
+                    <a href="{:url('manager/index/index')}">
+                        <img src="__image__/admin/B/super-manager-close.png" alt=""><span style="color: #fff" class="info hide">超级管理</span>
+                    </a>
+                </li>
+                {/if}
+                {/if}
+            </ul>
+        </div>
+    </div>
+
+    <div class="west_foot1" style="width:100%;height:36px;position: absolute;bottom: 0px;padding-right: 12px;">
+        <a href="javascript:changeall()" >
+            <!-- <i class="menus-icon am-icon-align-justify am-icon-sm"></i> -->
+            <img src="__image__/admin/B/right.png" style="height: 20px;width: 20px;display: block;float: right;
+            " alt="">
+        </a>
+    </div>
+    <div class="west_foot2 hide" style="width:100%;height:36px;position: absolute;bottom: 0px;padding-right: 12px;">
+        <a href="javascript:changesmall()" >
+            <!-- <i class="menus-icon am-icon-align-justify am-icon-sm"></i> -->
+            <img src="__image__/admin/B/left.png" style="height: 20px;width: 20px;display: block;float: right;
+            " alt="">
+        </a>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var width =document.body.clientWidth;
+
+    var changeall =function(){
+        $("#layout-west").css("width","160px");
+        $("#layout-center").css({"position":"absolute","left":"160px","width":(width-160)+"px"});
+        $(".info").removeClass("hide");
+        $(".west_foot2").removeClass("hide");
+        $(".west_foot1").addClass("hide");
+        if($(".notices")[0].textContent > 0) {
+            $('.notices').removeClass("hide");
+            $('.notices-icon').addClass("hide");     
+        }
+    }
+    var changesmall =function(){
+        $("#layout-west").css("width","80px");
+        $("#layout-center").css({"position":"absolute","left":"80px","width":(width-80)+"px"});
+        $(".info").addClass("hide");
+        $(".west_foot2").addClass("hide");
+        $(".west_foot1").removeClass("hide");
+        if($(".notices")[0].textContent > 0) {
+            $('.notices-icon').removeClass("hide");
+            $('.notices').addClass("hide");
+        }
+    }
+
+    // window.onresize = function(){
+    //     $("#layout-west").css("width","80px");
+    //     $("#layout-center").css("width",(width-80)+"px");
+    // }
+
+    var is_bind_wechat = 1;
+    if (!is_bind_wechat) {
+        var index = layer.open({
+            content: '您还未绑定微信，无法接受模板消息'
+            ,btn: ['前去绑定','忽略']
+            ,yes: function(index, layero){
+                $.ajax({
+                    url: "{:url('admin/index/qrcode')}",
+                    dataType: 'json',
+                    success: function (res) {
+                        layer.close(index);
+                        layer.open({
+                            type: 1,
+                            content: '<img  src="'+res.data+'"/>',
+                        });
+                    }
+                });
+                return false;
+            },
+            btn2: function(index, layero){
+            //按钮【按钮二】的回调
+
+            //return false 开启该代码可禁止点击该按钮关闭
+            }
+            ,cancel: function(){
+
+            }
+        });
+    }
+</script>
+
+<div id="layout-center">
+    <div id="layout-north">
+        <ul id="layout-tools" class="am-nav am-nav-pills">
+            <li style="width: 100%;height: 25px">
+                <div class="am-dropdown " data-am-dropdown>
+                    <a class="am-dropdown-toggle" href="javascript:;" data-am-dropdown-toggle>
+                        <img  id="se_avatar" src="{$arr['avatar']}" alt="..." class="am-circle" width="28px" height="28px">
+                        <span class="handle" id="se"> {$arr['nick_name']} </span>
+                        <span id="channel" style="display: none;"></span>
+                        <span id="customer" style="display: none;"></span>
+                        {if $arr['state'] == 'online'}
+                        <span class="profile">在线<i class="am-icon-caret-down"></i></span>
+                        {else}
+                         <span class="profile">离线<i class="am-icon-caret-down"></i></span>
+                        {/if}
+                    </a>
+
+                    <ul class="am-dropdown-content">
+                        <li><a href='javascript:showinfo({$data},{$group})'><img src="__image__/admin/B/person.png" alt="">个人资料</a></li>
+                        <li><a href='javascript:modify({$arr["service_id"]})' ><img src="__image__/admin/B/change-password.png" alt="">修改密码</a></li>
+                        {if condition="$arr['level'] == 'super_manager' && $referer && $is_we7 != 1"}
+                        <li><a href="{:url('platform/index/index')}"><img src="__image__/admin/B/back-system.png" alt="">返回系统</a></li>
+                        {/if}
+                        {if condition="$is_we7 == 1"}
+                        {if condition="!empty($we7_referer)"}
+                            <li><a href="{$we7_referer}"><img src="__image__/admin/B/back-system.png" alt="">返回系统</a></li>
+                        {/if}
+                        {/if}
+                        <li>
+                            <a href="{:url('admin/login/logout',['business_id'=>$arr['business_id']])}" class="safe-exit">
+                                <img src="__image__/admin/B/quit.png" alt="">安全退出
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+    </div>
+

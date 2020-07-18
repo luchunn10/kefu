@@ -1,0 +1,101 @@
+{include file="../application/admin/view/public/header.html"/}
+
+<style>
+    .back {
+        height: 32px;
+        line-height: 32px;
+        border-radius: 16px;
+        border: 1px solid #E5E3E9;
+        width: 130px;
+        cursor: pointer;
+        margin-right: 20px;
+    }
+
+    .back img {
+        float: left;
+        display: block;
+        margin: 7px;
+        margin-left: 16px;
+    }
+
+    .checkbox-item input[type='checkbox'] {
+        width: 16px;
+        height: 16px;
+        background-color: #fff;
+        background: url("__image__/admin/none.png") no-repeat center;
+        font-size: 12px;
+        display: inline-block;
+        border: 0;
+        position: relative;
+        top: 7px;
+        -webkit-appearance:none;
+        outline: none;
+    }
+
+    .checkbox-item input[type=checkbox]:checked{
+       background: url("__image__/admin/over.png") no-repeat center;
+    }
+
+    .list {
+        display: flex;
+        height: 50px;
+        line-height: 50px;
+        margin-top: 20px;
+        padding-left: 50px;
+    }
+
+    .list-title {
+        color: #A1A1A1;
+    }
+
+    .checkbox-item {
+        margin-left: 30px;
+    }
+
+    .submit-btn {
+        padding: 0;
+        height: 32px;
+        line-height: 32px;
+        width: 66px;
+        border-radius: 16px;
+        font-size: 13px;
+        color: #fff;
+        background-color: #3399ff;
+        border: 1px solid #3399ff;
+    }
+</style>
+
+<div id="container" style="overflow-y: auto;">
+    <h2 class="page-header" style="font-size: 18px;color: #555555;">清除缓存</h2>
+    <div style="display: flex;">
+        <div class="back" onclick="window.location.href=`{:url('manager/index/index')}`">
+            <img src="__image__/admin/B/back-system.png" alt="">
+            <div>返回超级管理</div>
+        </div>      
+    </div>
+    <div class="list">
+        <div class="list-title">清理项目</div>
+        <div class="checkbox-item">
+            <input class="checkbox" name="group" value="0" type="checkbox">
+            <span style="margin-left: 5px;">数据缓存</span>
+        </div>
+        <div class="checkbox-item">
+            <input class="checkbox" name="group" value="0" type="checkbox">
+            <span style="margin-left: 5px;">模版缓存</span>
+        </div>
+        <div class="checkbox-item">
+            <input class="checkbox" name="group" value="0" type="checkbox">
+            <span style="margin-left: 5px;">日志缓存</span>
+        </div>
+    </div>
+    <div style="padding-left: 125px;margin-top: 20px;">
+        <a class="btn btn-primary submit-btn" href="javascript:">提交</a>
+    </div>
+</div>
+<script>
+
+</script>
+
+
+
+{include file="../application/admin/view/public/footer.html"/}

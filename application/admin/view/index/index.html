@@ -1,0 +1,154 @@
+{include file="public/header"/}
+
+<script type="text/javascript" src='__libs__/echarts/echarts.min.js'></script>
+<div id="container" style="overflow-y: auto">
+    <div class="statistics" style="margin: 40px 0 0 40px;">
+        <div class="tab-title">
+            <p style="font-weight: bold;font-size: 18px;color: #555555;">数据总览</p>
+        </div>
+        <div class="tab-box" style="margin-top:25px;height: 180px;margin-left: 40px; ">
+            <div class="databox">
+                <div class="line-top">
+                    <p class="data_title">正在咨询人数</p>
+                   
+                    <p class="data_content">{$talking}</p>
+                  
+                </div>
+                <div class="line-bottom"
+                     style="width: 318px;height: 58px; background:#F4F2F2;line-height: 58px;">
+                    <p><span class="data_title">当前客服在线数</span>&nbsp;&nbsp;&nbsp;
+                      
+                        <span>{$services}</span>
+                        
+                    </p>
+                </div>
+            </div>
+            <div class="databox">
+                <div class="line-top">
+                    <p class="data_title">正在排队人数</p>
+                    <p class="data_content">{$waiter}</p>
+                   
+                </div>
+                <div class="line-bottom"
+                     style="width: 318px;height: 58px; background:#F4F2F2;padding-top: 20px;padding-bottom: 20px;">
+                    <p><span class="data_title">接入总人数</span>&nbsp;&nbsp;&nbsp;
+                      
+                        <span>{$getinall}</span>
+                     
+                    </p>
+
+                </div>
+            </div>
+            <div class="databox">
+                <div class="line-top">
+                    <p class="data_title">今日会话量</p>
+                  
+                    <p class="data_content">{$nowchats}</p>
+                    
+                </div>
+                <div class="line-bottom"
+                     style="width: 318px;height: 58px; background:#F4F2F2;padding-top: 20px;padding-bottom: 20px;">
+                    <p><span class="data_title">会话总量</span>&nbsp;&nbsp;&nbsp;                    
+                        <span>{$chatsall}</span>
+                    </p>
+                </div>
+            </div>
+            <div class="databox">
+                <div class="line-top">
+                    <p class="data_title">今日评价人数</p>
+                  
+                    <p class="data_content">{$nowcomments}</p>
+                    
+                </div>
+                <div class="line-bottom"
+                     style="width: 318px;height: 58px; background:#F4F2F2;padding-top: 20px;padding-bottom: 20px;">
+                    <p><span class="data_title">总评价总人数</span>&nbsp;&nbsp;&nbsp;                    
+                        <span>{$allcomments}</span>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="wolivedatas" style="width: 80%;height:500px;margin-top: 50px;">
+
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+    var myChart = echarts.init(document.getElementById('wolivedatas'));
+
+    var option = {
+        title: {
+            text: '今日在线服务数据趋势',
+            padding: '10,0,0,0'
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        color:['#ff5c5c','#3399ff','#8bd8ab'],
+        legend: {
+            y: '400px',
+            zlevel:'99',
+            data: [{name:'会话总量',textStyle: {color: '#555555'}}, {name:'接入会话总量',textStyle: {color: '#555555'}}]
+        },
+        grid: {
+            top: '50',
+            left: '3%',
+            right: '4%',
+            bottom: '125',
+            width: '1200',
+            containLabel: true
+        },
+        toolbox: {
+            feature: {
+                saveAsImage: {}
+            }
+        },
+        xAxis: {
+            splitLine: {
+                show: true,
+                lineStyle:{
+                    type:'dashed'
+                }
+            },
+            type: 'category',
+            boundaryGap: false,
+            data: ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00', '00:00']
+        },
+        yAxis: {
+            splitLine: {
+                show: true,
+                lineStyle:{
+                    type:'dashed'
+                }
+            },
+            type: 'value',
+            max: 'dataMax',
+            min: "dataMin",
+        },
+        series: [
+
+            {
+                name: '会话总量',
+                type: 'line',
+                smooth: true,
+                data: [{$chatsdata[0]}, {$chatsdata[1]}, {$chatsdata[2]}, {$chatsdata[3]}, {$chatsdata[4]}, {$chatsdata[5]}, {$chatsdata[6]}, {$chatsdata[7]}, {$chatsdata[8]}]
+            },
+            {
+                name: '接入会话总量',
+                type: 'line',
+                smooth: true,
+                data: [{$getindata[0]}, {$getindata[1]}, {$getindata[2]}, {$getindata[3]}, {$getindata[4]}, {$getindata[5]}, {$getindata[6]}, {$getindata[7]}, {$getindata[8]}]
+            }
+        ]
+    };
+
+
+    myChart.setOption(option);
+</script>
+
+{include file="public/footer"/}
+
+

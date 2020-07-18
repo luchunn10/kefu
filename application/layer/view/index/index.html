@@ -1,0 +1,786 @@
+﻿<html lang="zh-cn">
+  <head>
+  	<meta charset="UTF-8">
+  	<meta http-equiv="X-UA-Compatible" content="IE=EDGE">
+	<meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,user-scalable=no">
+	<meta name="MobileOptimized" content="320">
+	<meta http-equiv="cleartype" content="on">
+	<meta name="robots" content="noindex,nofollow">
+	<title>wolive</title>
+      <script>
+          HJWEB_ROOT_URL = '{:request()->root()}';
+      </script>
+    {load href="__libs__/jquery/jquery.min.js"/}
+    {load href="__style__/index/chat.css"}
+    {load href="__libs__/jquery/jquery.cookie.js"/}
+    {load href="__libs__/jquery/jquery.form.min.js"/}
+    {load href="__libs__/layui/css/layui.css"/}
+    {load href="__libs__/layui/layui.js"/}
+    {load href="__libs__/layer/skin/layer.css"/}
+    {load href="__libs__/layer/layer.js"/}
+    {load href="__libs__/push/pusher.min.js"/}
+    <script type="text/javascript" src="__libs__/webrtc/recorder.js"></script>
+  <style>
+      *{
+        padding: 0;
+        margin:0;
+       }
+
+      ::-webkit-scrollbar {
+          width: 6px
+      }
+
+      ::-webkit-scrollbar-track {
+          background-color: #ddd
+      }
+
+      ::-webkit-scrollbar-track-piece {
+          background-color: #f3f3f3;
+          -webkit-border-radius: 3px
+      }
+
+      ::-webkit-scrollbar-thumb {
+          background-color: #ccc;
+          border: solid 1px #c0c0c0;
+          border-radius: 3px
+      }
+
+      ::-webkit-scrollbar-corner {
+          background-color: #f3f3f3
+      }
+
+      ::-webkit-resizer {
+          background-repeat: no-repeat;
+          background-position: bottom right
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+          background-color: #bbb
+      }
+
+      .input-but {
+            position: relative;
+            display: inline-block;
+            vertical-align: middle;
+            width: 30px;
+            height: 30px;
+      }
+
+      .fileinput {
+            width: 30px;
+            height: 30px;
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            opacity: 0;
+            filter: alpha(opacity=0);
+            cursor: pointer;
+      }
+
+      .icon_gray {
+            -webkit-filter: grayscale(100%);
+            -ms-filter: grayscale(100%);
+            filter: grayscale(100%);
+            filter: gray;
+      }
+
+      .triangle {
+            display: inline-block;
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 8px solid #fff;
+      }
+
+      .hide{
+            display: none;
+      }
+
+      .hidden{
+           visibility:hidden; 
+      }
+      .chatmsg{
+          margin-bottom: 25px;
+          position: relative;
+          margin-top: 10px;
+      }
+
+      .tool_box {
+          width: 280px;
+          height: 195px;
+          position: absolute;
+          bottom: 150px;
+          border: 1px solid #ddd;
+          display: none;
+      }
+
+      .question{
+        cursor: pointer;
+      }
+
+  </style>
+  <script>
+      var visiter ='{$visiter}';
+      var business_id  ='{$business_id}';
+      var record='{$from_url}';
+      record.replace("%23","#");
+      record.replace("%26","&");
+      var pic ='{$avatar}';
+      var channel= '{$channel}';
+      var visiter_id= '{$visiter_id}';
+      var url ='{$url}';
+      var gid ='{$groupid}';
+      var pic ='{$avatar}';
+      if (pic == "") {
+          pic = "__image__/index/avatar-red2.png";
+      }
+
+      var service_id=0;
+
+      var wolive_connect =function () {
+         var pusher = new Pusher('{$app_key}', {
+                encrypted: {$value}
+                ,enabledTransports: ['ws']
+                ,wsHost: '{$whost}'
+                ,{$port}: {$wport}
+                ,disableStats: true
+         });
+         var channels = pusher.subscribe("cu" + channel);
+         // 接收消息
+         channels.bind('my-event', function (data) {
+            var msg = '';
+                msg += '<li class="chatmsg"><div style="position: absolute;left:8px;">';
+                msg += '<img class="my-circle  se_pic" src="' + data.message.avatar + '" width="40px" height="40px"></div>';
+                msg += "<div class='outer-left' style='right: 4%;'><div class='service'>";
+                msg += "<div class='left_triangle'>" + "</div>";
+                msg += "<pre>" + data.message.content + "</pre>";
+                msg += "</div></div>";
+                msg += "</li>";
+                $(".chatmsg_notice").remove();
+                $(".chatmsg_no").remove();
+                $(".conversation").append(msg);
+                var div = document.getElementById("wrap");
+                div.scrollTop = div.scrollHeight;  
+          });
+
+          // 认领通知
+          channels.bind('cu_notice', function (data) {
+
+                $("#img_head").attr("src", data.message.avatar);
+                $("#services").text(data.message.nick_name);
+                $(".chatmsg_notice").remove();
+                $(".chatmsg").remove();
+                $.cookie("services",data.message.service_id);
+                service_id =data.message.service_id;
+                getquestion(data.message.business_id);
+                getdata();
+                getlisten(data.message.service_id);
+          });
+
+          // 接受视频请求
+          channels.bind("video",function (data) {
+                var msg = data.message;
+                var cha = data.channel;
+                var avatar =data.avatar;
+                var username =data.username;
+                layer.open({
+                    type: 1,
+                    title: '申请框',
+                    area: ['260px', '160px'],
+                    shade: 0.01,
+                    fixed: true,
+                    btn: ['接受', '拒绝'],
+                    content: "<div style='position: absolute;left:20px;top:15px;'><img src='"+avatar+"' width='40px' height='40px' style='border-radius:40px;position:absolute;left:5px;top:5px;'><span style='width:100px;position:absolute;left:70px;top:5px;font-size:13px;overflow-x: hidden;'>"+username+"</span><div style='width:90px;height:20px;position:absolute;left:70px;top:26px;'>"+msg+"</div></div>",
+                    yes: function () {
+                        layer.closeAll('page');
+                        var falg = window.location.protocol;
+                        if (falg == 'https:') {
+                            layer.open({
+                                type: 2,
+                                title: 'video',
+                                area: ['380px', '300px'],
+                                shade: false,
+                                resize: true,
+                                content: 'https://rtc.laychat.net/call/' + cha
+                            });
+                        } else {
+                            var iWidth = 400;  // 窗口宽度
+                            var iHeight = 300; // 窗口高度
+                            var iTop = (window.screen.availHeight - 30 - iHeight) / 2;
+                            var iLeft = (window.screen.availWidth - 10 - iWidth) / 2;
+                            win = window.open("https://rtc.laychat.net/call/" + cha, "_blank", "toolbar=no,directories=no, status=no, menubar=yes, scrollbars=yes, resizable=no, copyhistory=yes, width=" + iWidth + ", height=" + iHeight + ",top=" + iTop + ",left=" + iLeft + ",alwaysRaised=yes");
+                        }
+                    },
+                    btn2:function(){
+                        var sid =$.cookie('services');
+                        $.ajax({
+                            url:HJWEB_ROOT_URL+'/admin/event/refuse',
+                            type:'post',
+                            data:{id:sid}
+                        });
+
+                        layer.closeAll('page');
+                    }
+                });
+          });
+
+          // 接受拒绝视频请求
+          channels.bind("video-refuse",function (data) {
+                layer.alert(data.message);
+          });
+
+          // 问候语
+          channels.bind('first_word',function(data){
+                var msg = '';
+                msg += '<li class="chatmsg"><div style="position: absolute;left:3px;top:14px;">';
+                msg += '<img class="my-circle  se_pic" src="' + data.message.avatar + '" width="40px" height="40px"></div>';
+                msg += "<div class='outer-left'  style='right:4%;top:13px;'><div class='service'>";
+                msg += "<div class='left_triangle'>" + "</div>";
+                msg += "<pre>" + data.message.content + "</pre>";
+                msg += "</div></div>";
+                msg += "</li>";
+
+                $(".conversation").append(msg);
+
+                var div = document.getElementById("wrap");
+                div.scrollTop = div.scrollHeight;  
+            });
+
+            
+            if($.cookie('services')){
+               getlisten($.cookie('services'))
+            }
+
+            function getlisten(chas){
+
+                var channels = pusher.subscribe("se"+chas);
+
+                //通知游客 客服离线
+                channels.bind('logout', function (data) {
+                    $("#img_head").addClass("icon_gray");   
+                                 
+                });
+
+                //表示客服在线
+                channels.bind("geton", function (data) {
+                    $("#img_head").removeClass("icon_gray");
+
+                });
+             }
+
+
+           pusher.connection.bind('state_change', function(states) {
+                if(states.current == 'unavailable' || states.current == "disconnected" || states.current == "failed" ){
+                    $.cookie("cid","");
+                    var id =$.cookie("services");
+                    if(id){
+                      pusher.unsubscribe("se"+id);
+                    }
+                    pusher.unsubscribe("cu" + channel);
+
+                   if (typeof pusher.isdisconnect == 'undefined') {
+                    pusher.isdisconnect = true;
+                    pusher.disconnect();
+                     delete pusher;
+                    window.setTimeout(function(){
+                        wolive_connect();
+                    },1000);
+                  }
+                }
+            });
+      }
+    
+  </script>
+  </head>
+  <body style="background: #fff;">
+    <div class="" style="display: block; height: 100%; width: 100%;top: 0px; bottom: 0px; left: 0px; margin-top: 0px; margin-left: 0px;">
+  	 <div id="wolive-Chat" class="" >
+
+  	 	 <div class="header" style="background: rgb(19, 201, 203);width: 100%;height: 70px;position: relative;">
+  	 	 	
+  	 	 	<div class="infoBar" style="position: absolute;">
+  	 	 		<img id="img_head" src="__image__/index/workerman_logo.png"  style="width: 46px;height: 46px;border-radius: 50%;position: absolute;left: 10px;top: 10px;" >
+  	 	 		<div style="position: absolute;left: 70px;top: 12px;">
+  	 	 			<p>
+  	 	 					<span id='services' style="display: inline-block;width: 200px;overflow-x: hidden;height: 46px;line-height: 46px"></span>
+  	 	 			</p>
+
+  	 	 			<p class="" id="" ></p>
+  	 	 		</div>
+  	 	 	</div>
+  	 	 </div>
+
+  	 	 <div class="chatMain" style="width:100%;">
+  	 	 		<div>
+  	 	 			<ul id="wrap"  class="conversation" style="width:100%;height: 280px;background-color: #fff;padding:0px;overflow-y: auto;left: 0;margin: 0;" >
+  	 	 		
+  	 	 			</ul>
+  	 	 		</div>
+
+            <div class="tool_box">
+
+                <div class="wl_faces_content">
+
+                    <div class="wl_faces_main">
+
+                    </div>
+                </div>
+
+            </div>
+
+  	 	 		<div id="footer" style="position: absolute;bottom: 0;width: 100%;height: 150px;" >
+            <div class="msg-input" style="margin: 0">
+                <div  style="width: 100%;margin:0 auto;">
+                    <textarea id="text_in" class="edit-ipt"
+                         style="font-weight: normal; font-size: 16px; overflow-x: hidden;overflow-y:auto;word-break: break-all; font-style: normal; outline: none;width: 100%;height: 76px;border:none;padding: 10px;border-top: 1px solid #f7f7f7"
+                         contenteditable="true" hidefocus="true" tabindex="0"></textarea>
+                </div>
+            </div>
+            <div class="msg-toolbar" style="width: 60%;margin:0 auto;background: #fff;height: 20px;bottom: 20px;left: 10px;position: absolute;">
+                <a id="face_icon" href="javascript:" onclick="faceon()"><img src="__image__/admin/B/smile.png" alt=""></a>
+                {if $video == 'open'}
+                <a id="video" style="cursor: pointer;" onclick="getvideo()"><i class="layui-icon" style="font-size: 20px;">&#xe6ed;</i></a>
+                {/if}
+                {if $audio == 'open'}
+                <a onclick="getaudio()"><i class="layui-icon" style="font-size: 20px;cursor: pointer;">&#xe688;</i></a>
+                {/if}
+
+                <a id="images" href="javascript:">
+                    <form id="picture" enctype="multipart/form-data" style="width: 20px;height: 24px;">
+                        <div class="layui-box input-but  size">
+                            <img src="__image__/admin/B/photo.png" alt="">
+                            <input type="file" name="upload" class="fileinput" onchange="put()"/>
+                        </div>
+                    </form>
+                </a>
+
+                <a id="files" href="javascript:">
+                    <form id="file" enctype="multipart/form-data" style="width: 20px;height: 24px;">
+                        <div class="layui-box input-but  size">
+                            <img src="__image__/admin/B/file.png" alt="">
+                            <input type="file" name="folder" class="fileinput" onchange="putfile()"/>
+                        </div>
+                    </form>
+                </a>
+                <a onmouseover="info()" id="paste" style="position:absolute; right:0;cursor: pointer;width: 120px;"><img src="__image__/admin/B/screen.png" alt=""> 怎样发截图？</a>
+            </div>
+            <div class="msg-toolbar-footer grey12" style="bottom: 10px;right: 10px;position: absolute;">
+                <a onclick="send()" class="layui-btn msg-send-btn">
+                               发送
+                 </a>
+                 <a id="showinfo" class="showinfo">
+                    <div style="height: 12px;border-left: 1px solid #FFF;margin-top: 8px;padding: 7px 15px">
+                        <img src="__image__/admin/B/up-menu.png" alt=""> 
+                    </div>
+                 </a>
+            </div>
+             <!-- 浮层 -->
+             <div id='fuceng' class="hide" style="background: #e2e2e2;width:270px;height: 80px;position: absolute;bottom: 10px;right: 6px;z-index: 9999;border-radius: 8px;">
+              <ul style="display: inline-block;width: 100%;height: 30px;line-height: 40px;text-align: center;">
+                  <li onclick="choose(this)" style="cursor: pointer;" name='1'><i id='type1' class="layui-icon">&#xe605;</i><span>按Enter键发送消息，Ctrl+Enter换行</span></li>
+                  <li onclick="choose(this)" style="cursor: pointer;" name='2'><i id='type2' class="layui-icon hidden">&#xe605;</i><span>按Ctrl+Enter键发送消息，Enter换行</span></li>
+              </ul>       
+            </div>
+  	 	 		</div>
+  	 	  </div>
+  	  	</div>
+  	 </div>
+  	 <audio src="" id="newMsgAudio" style="display:none"></audio>
+    <script type="text/javascript" src="__script__/layer/layerchat.js"></script>
+
+  	<script>
+
+
+      document.getElementById("wrap").onscroll = function(){
+                    var t =  document.getElementById("wrap").scrollTop;
+                    if( t == 0 ) {
+                        console.log($.cookie("cid"));
+                        if($.cookie("cid") != ""){
+                           getdata();
+                        }
+
+                    }
+        }
+
+     function getOs() {
+        var OsObject = "";
+        if (isFirefox = navigator.userAgent.indexOf("Firefox") > 0) {
+            return "Firefox";
+        }
+     }
+
+
+      //获取qq截图的图片
+
+        var imgReader = function (item) {
+            var blob = item.getAsFile(),
+                reader = new FileReader();
+            // 读取文件后将其显示在网页中
+            reader.onload = function (e) {
+                var msg = '';
+                msg += '<img onclick="getbig(this)"  src="' + e.target.result + '">';
+
+                if (getOs() != "Firefox") {
+                    var time;
+
+                    if($.cookie("itime") == ""){
+                        var myDate = new Date();
+                            time = myDate.getHours()+":"+myDate.getMinutes();
+                        var timestamp = Date.parse(new Date());
+                        $.cookie("itime",timestamp/1000);
+                    
+                    }else{
+
+                        var timestamp = Date.parse(new Date());
+                        var lasttime =$.cookie("itime");
+                        if((timestamp/1000 - lasttime) >30){
+                            var myDate =new Date(timestamp);
+                            time = myDate.getHours()+":"+myDate.getMinutes();
+                        }else{
+                            time ="";
+                        }
+
+                        $.cookie("itime",timestamp/1000);
+                    }
+
+                    var str = '';
+                    str += '<li class="chatmsg"><div class="showtime">' + time + '</div>';
+                    str += '<div style="position: absolute;top: 29px;right: 6px;"><img  class="my-circle cu_pic" src="' + pic + '" width="40px" height="40px"></div>';
+                    str += "<div class='outer-right' style='right:16%;'><div class='customer'>";
+                    str += "<div class='chat-right_triangle'>" + "</div>";
+                    str += "<pre>" + msg + "</pre>";
+                    str += "</div></div>";
+                    str += "</li>";
+
+                    $(".conversation").append(str);
+                    var div = document.getElementById("wrap");
+                    div.scrollTop = div.scrollHeight;
+
+                    $.ajax({
+                        url:HJWEB_ROOT_URL+"/admin/event/chat",
+                        type: "post",
+                        data: {visiter_id:visiter_id,content: msg,business_id: business_id, avatar: pic,record: record},
+                        dataType:'json',
+                        success:function(res){
+                            if(res.code != 0){
+                                layer.msg(res.msg,{icon:2});
+                            }
+                        }
+                    });
+                }
+            };
+            // 读取文件
+            reader.readAsDataURL(blob);
+        };
+        document.getElementById('text_in').addEventListener('paste', function (e) {
+            // 添加到事件对象中的访问系统剪贴板的接口
+            var clipboardData = e.clipboardData,
+                i = 0,
+                items, item, types;
+
+            if (clipboardData) {
+                items = clipboardData.items;
+                if (!items) {
+                    return;
+                }
+                item = items[0];
+                // 保存在剪贴板中的数据类型
+                types = clipboardData.types || [];
+                for (; i < types.length; i++) {
+                    if (types[i] === 'Files') {
+                        item = items[i];
+                        break;
+                    }
+                }
+                // 判断是否为图片数据
+                if (item && item.kind === 'file' && item.type.match(/^image\//i)) {
+                    imgReader(item);
+                }
+            }
+        });
+    
+     
+    var types=function(){
+       if($.cookie('type') == 1){
+       //快捷键
+        document.getElementById("text_in").onkeydown = function (e) {
+            e = e || window.event;
+
+             if (e.ctrlKey && e.keyCode == 13) {
+                $("#text_in").append("<div><br/></div>");
+                var o = document.getElementById("text_in").lastChild;            
+                var textbox = document.getElementById('text_in');
+                var sel = window.getSelection();
+                var range = document.createRange();
+                range.selectNodeContents(textbox);
+                range.collapse(false);
+                if(o){
+                 range.setEndAfter(o);
+                 range.setStartAfter(o); 
+                }
+             
+                sel.removeAllRanges();
+                sel.addRange(range);
+
+             }        
+
+            if(!e.ctrlKey && e.keyCode == 13){
+              var a=$('#text_in').val();
+              var str=a.replace(/(^\s*)|(\s*$)/g,"");
+              if(!str){  
+                layer.msg('内容不能为空',{icon:3});
+                $('#text_in').val('');
+                return false;
+               }
+               
+               send();
+               e.returnValue = false;
+               return false;
+            }
+        };
+
+        }else{
+
+            document.getElementById("text_in").onkeydown = function (e) {
+            e = e || window.event;
+            if (e.ctrlKey && e.keyCode == 13) {
+                if ($('#text_in').val() == "" || $.cookie("service") == '' ) {
+                    layer.msg('请输入信息');
+                } else {
+                    send();
+                }
+            }
+          }
+        }
+     }
+
+      function info(){
+         layer.tips("将您剪切好的图片粘贴到输入框即可", "#paste", {tips: [1, '#9EC6EA'],area: '215px'});
+      } 
+
+
+      function showDiv(){
+         $("#fuceng").toggleClass('hide');
+      }
+
+      $(function (){
+
+         $("#showinfo").on('click',function(){
+
+            showDiv();
+
+            $(document).one("click", function () {
+            
+             $("#fuceng").addClass('hide');
+
+            }); 
+            event.stopPropagation();//阻止事件向上冒泡
+        });
+
+        $("#fuceng").click(function (event) 
+        {3
+            event.stopPropagation();//阻止事件向上冒泡
+            
+         });
+      });
+
+      function choose(obj){
+
+        $(obj).children('i').removeClass('hidden');
+        $(obj).siblings('li').children('i').addClass('hidden'); 
+        var type =$(obj).attr('name');
+        $.cookie('type',type);
+        $("#fuceng").addClass('hide');
+        types();
+      }
+     
+      function getclose(){
+        var t=window.parent; 
+        t.wolive.narrow();
+      }
+
+    // 视频通话
+    var getvideo =function(){
+
+        var times = (new Date()).valueOf();
+        if($.cookie('services')){
+            var sid =$.cookie('services');
+            //申请
+            $.ajax({
+                url:HJWEB_ROOT_URL+'/admin/event/apply',
+                type: 'post',
+                data: {id: sid,channel: times,avatar:pic,name:visiter,visiter_id:visiter_id},
+                dataType:'json',
+                success:function (res) {
+                    if(res.code != 0){
+                        layer.msg(res,{icon:2,offset:'20px'});
+                    }
+                }
+             });
+                var iWidth=400;  // 窗口宽度
+                var iHeight=300; // 窗口高度
+                var iTop = (window.screen.availHeight - 30 - iHeight) / 2;
+                var iLeft = (window.screen.availWidth - 10 - iWidth) / 2;
+                window.open("https://rtc.laychat.net/call/" + times, "_blank", "toolbar=no,directories=no, status=no, menubar=yes, scrollbars=yes, resizable=no, copyhistory=yes, width=" + iWidth + ", height=" + iHeight + ",top=" + iTop + ",left=" + iLeft + ",alwaysRaised=yes");
+        }else{
+
+            layer.msg("还未连接客服！不能使用该功能");
+        }
+    }
+
+
+     var getaudio =function(){
+
+          //音频先加载
+                var audio_context;
+                var recorder;
+                var wavBlob;
+                //创建音频
+                try {
+                    // webkit shim
+                    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.mediaDevices.getUserMedia;
+                    window.URL = window.URL || window.webkitURL;
+
+                    audio_context = new AudioContext;
+
+                    if (!navigator.getUserMedia) {
+                        console.log('语音创建失败');
+                    }
+                    ;
+                } catch (e) {
+                    console.log(e);
+                    return;
+                }
+                navigator.getUserMedia({audio: true}, function (stream) {
+                    var input = audio_context.createMediaStreamSource(stream);
+                    recorder = new Recorder(input);
+
+                    var falg = window.location.protocol;
+                    if (falg == 'https:') {
+                        recorder && recorder.record();
+
+                        //示范一个公告层
+                        layui.use(['jquery', 'layer'], function () {
+                            var layer = layui.layer;
+
+                            layer.msg('录音中...', {
+                                icon: 16
+                                , shade: 0.01
+                                , skin: 'layui-layer-lan'
+                                , time: 0 //20s后自动关闭
+                                , btn: ['发送', '取消']
+                                , yes: function (index, layero) {
+                                    //按钮【按钮一】的回调
+                                    recorder && recorder.stop();
+                                    recorder && recorder.exportWAV(function (blob) {
+                                        wavBlob = blob;
+                                        var fd = new FormData();
+                                        var wavName = encodeURIComponent('audio_recording_' + new Date().getTime() + '.wav');
+                                        fd.append('wavName', wavName);
+                                        fd.append('file', wavBlob);
+
+                                        var xhr = new XMLHttpRequest();
+                                        xhr.onreadystatechange = function () {
+                                            if (xhr.readyState == 4 && xhr.status == 200) {
+                                                jsonObject = JSON.parse(xhr.responseText);
+
+                                                voicemessage = '<div style="cursor:pointer;text-align:center;" onclick="getstate(this)" data="play"><audio src="'+jsonObject.data.src+'"></audio><i class="layui-icon" style="font-size:25px;">&#xe652;</i><p>音频消息</p></div>';
+
+                                                    var sid = $('#channel').text();
+                                    
+                                                    var time;
+
+                                                    var sdata = $.cookie('cu_com');
+
+                                                    if (sdata) {
+                                                        var json = $.parseJSON(sdata);
+                                                        var img = json.avater;
+
+                                                    }
+
+                                                       if($.cookie("itime") == ""){
+                                                            var myDate = new Date();
+                                                                time = myDate.getHours()+":"+myDate.getMinutes();
+                                                            var timestamp = Date.parse(new Date());
+                                                            $.cookie("itime",timestamp/1000);
+                                                        
+                                                        }else{
+
+                                                            var timestamp = Date.parse(new Date());
+                                                            var lasttime =$.cookie("itime");
+                                                            if((timestamp/1000 - lasttime) >30){
+                                                                var myDate =new Date(timestamp);
+                                                                time = myDate.getHours()+":"+myDate.getMinutes();
+                                                            }else{
+                                                                time ="";
+                                                            }
+
+                                                            $.cookie("itime",timestamp/1000);
+                                                        }
+                                               
+                                                var str = '';
+                                                    str += '<li class="chatmsg"><div class="showtime">' + time + '</div>';
+                                                    str += '<div style="position: absolute;top: 26px;right: 2px;"><img  class="my-circle cu_pic" src="' + pic + '" width="50px" height="50px"></div>';
+                                                    str += "<div class='outer-right'><div class='customer'>";
+                                                    str += "<div class='chat-right_triangle'>" + "</div>";
+                                                    str += "<pre>" +  voicemessage + "</pre>";
+                                                    str += "</div></div>";
+                                                    str += "</li>";
+
+                                                    $(".conversation").append(str);
+                                                    $("#text_in").empty();
+
+                                                    var div = document.getElementById("wrap");
+                                                    div.scrollTop = div.scrollHeight;
+
+                                                   $.ajax({
+                                                    url:HJWEB_ROOT_URL+"/admin/event/chat",
+                                                    type: "post",
+                                                    data: {visiter_id:visiter_id,content: voicemessage,business_id: business_id, avatar: pic,record: record},
+                                                    dataType:'json',
+                                                    success:function(res){
+                                                        if(res.code != 0){
+                                                            layer.msg(res.msg,{icon:2});
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        };
+                                        xhr.open('POST', '/admin/event/uploadVoice');
+                                        xhr.send(fd);
+                                    });
+                                    recorder.clear();
+                                    layer.close(index);
+                                }
+                                , btn2: function (index, layero) {
+                                    //按钮【按钮二】的回调
+                                    recorder && recorder.stop();
+                                    recorder.clear();
+                                    audio_context.close();
+                                    layer.close(index);
+                                }
+                            });
+
+                        });
+                    } else {
+                        
+                        layer.msg('音频输入只支持https协议！');
+                        
+                    }
+
+                }, function (e) {
+                     layer.msg('音频输入只支持https协议！');
+                });
+
+    }
+
+
+       
+    </script>
+
+  	</body>
+      
+ </html>
+

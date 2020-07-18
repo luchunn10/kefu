@@ -1,0 +1,185 @@
+{include file="public/header"/}
+
+<style>
+    #container{
+        padding: 0;
+    }
+
+    .part {
+        width: 96%;
+        margin-left: 40px;
+    }
+
+    .person-setting {
+        height: 208px;
+    }
+
+    .system-setting {
+        height: 208px;
+    }
+
+    .part-item {
+        width: 120px;
+        height: 120px;
+        position: relative;
+        cursor: pointer;
+        float: left;
+        margin-left: 20px;
+        margin-bottom: 20px;
+        background: #f7f7f7;
+        border-radius: 8px;
+    }
+
+    .part-item:first-child {
+        margin-left: 40px;
+    }
+
+    .part-item:hover {
+        background: #ffffff;
+        box-shadow: 0 0 8px 2px rgba(0, 0, 0, .1);
+    }
+
+    .part-item div {
+        width: 50px;
+        height: 50px;
+        margin-top: 20px;
+        font-size: 60px;
+        position: absolute;
+        left: 35px;
+    }
+
+    .part-item div.greetings {
+        background: url("__image__/admin/B/greetings.png") no-repeat center;
+    }
+
+    .part-item div.general-setting {
+        background: url("__image__/admin/B/general-setting.png") no-repeat center;
+    }
+
+    .part-item div.customer-manage {
+        background: url("__image__/admin/B/customer-manage.png") no-repeat center;
+    }
+
+    .part-item div.group-manage {
+        background: url("__image__/admin/B/group-manage.png") no-repeat center;
+    }
+
+    .part-item div.commom-question {
+        background: url("__image__/admin/B/commom-question.png") no-repeat center;
+    }
+
+    .part-item div.tab-edit {
+        background: url("__image__/admin/B/tab-edit.png") no-repeat center;
+    }
+
+    .part-item div.off-work {
+        background: url("__image__/admin/B/off-work.png") no-repeat center;
+    }
+
+    .part-item div.template-message {
+        background: url("__image__/admin/B/template-message.png") no-repeat center;
+    }
+
+    .part-item div.evaluate-setting {
+        background: url("__image__/admin/B/evaluate-setting.png") no-repeat center;
+    }
+
+    .part-item span {
+        position: absolute;
+        bottom: 10px;
+        left: 35px;
+    }
+
+    .page-header {
+        border-bottom: 0;
+        margin-left: 40px;
+    }
+</style>
+
+<div id="container">
+
+    <div class="person-setting">
+        <h2 class="page-header" style="font-size: 18px;color: #555555;"> 个人设置</h2>
+
+        <div class="part">
+            <a href="{:url('admin/index/custom')}">
+                <div class="part-item">
+                    <div class="greetings"></div>
+                    <span style="left: 40px;">问候语</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    {if $user['level'] != 'service'}
+
+    <div class="system-setting">
+        <h2 class="page-header" style="font-size: 18px;">系统设置</h2>
+
+        <div style="margin-left: 40px;">
+            <a href="{:url('admin/index/setup')}">
+                <div class="part-item">
+                    <div class="general-setting"></div>
+                    <span>通用设置</span>
+                </div>
+            </a>
+
+            <a href="{:url('admin/manager/info')}">
+                <div class="part-item">
+                    <div class="customer-manage"></div>
+                    <span style="width: 120px;left: 16px;">客服添加与管理</span>
+                </div>
+            </a>
+
+            <a href="{:url('admin/manager/group')}">
+                <div class="part-item">
+                    <div class="group-manage"></div>
+                    <span style="left: 35px;">分组管理</span>
+                </div>
+
+            </a>
+
+            <a href="{:url('admin/evaluate/setting')}">
+                <div class="part-item">
+                    <div class="evaluate-setting"></div>
+                    <span style="width: 120px;left: 36px;">评价设置</span>
+                </div>
+            </a>
+
+            <a href="{:url('admin/index/question')}">
+                <div class="part-item">
+                    <div class="commom-question"></div>
+                    <span>常见问题</span>
+                </div>
+            </a>
+
+
+            <a href="{:url('admin/rest/setting')}">
+                <div class="part-item">
+                    <div class="off-work"></div>
+                    <span style="width: 120px;left: 33px;">下班设置</span>
+                </div>
+
+            </a>
+
+            <a href="{:url('admin/index/tablist')}">
+                <div class="part-item">
+                    <div class="tab-edit"></div>
+                    <span style="width: 120px;left: 40px;">tab编辑</span>
+                </div>
+
+            </a>
+
+            <a href="{:url('admin/index/template')}">
+                <div class="part-item">
+                    <div class="template-message"></div>
+                    <span style="width: 120px;left: 36px;">模板消息</span>
+                </div>
+            </a>
+        </div>
+    </div>
+    {/if}
+</div>
+{include file="public/footer"/}
+
+

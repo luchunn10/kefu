@@ -1,0 +1,179 @@
+{include file="../application/admin/view/public/header.html"/}
+
+<style>
+    .back {
+        height: 32px;
+        line-height: 32px;
+        border-radius: 16px;
+        border: 1px solid #E5E3E9;
+        width: 130px;
+        cursor: pointer;
+        margin-right: 20px;
+    }
+
+    .back img {
+        float: left;
+        display: block;
+        margin: 7px;
+        margin-left: 16px;
+    }
+
+    .add-form-body {
+        padding: 24px 0;
+    }
+
+    .add-label {
+        width: 195px;
+        padding-left: 85px;
+        text-align: left;
+        margin: 0;
+        float: left;
+    }
+
+    .form-input .upload a{
+        width: 80px;
+        height: 36px;
+        background-color: #2E9FFF;
+        line-height: 36px;
+        padding: 0;
+        border-color: #2E9FFF;
+        color: #fff;
+        border-top-right-radius: 8px!important;
+        border-bottom-right-radius: 8px!important;
+    }
+
+    .form-input .form-control {
+        width: 500px;
+        padding-left: 16px;
+        border-radius: 8px;
+        height: 36px;
+        border: 1px solid #e5e3e9;
+    }
+
+    .col-form-label {
+        padding: 0;
+        width: 160px;
+        height: 36px;
+        line-height: 36px;
+        text-align: right;
+        margin-right: 32px;
+        float: left;
+        font-size: 13px;
+        color: #999999;
+    }
+
+    .preview {
+        margin-top: 10px;
+        display: block;
+        height: 72px;
+        width: 196px;
+        position: relative;
+        background-color: #f7f7f7;  
+    }
+
+    .logo-preview {
+        display: block;
+        height: 72px;        
+    }
+
+    .logo-preview img {
+        height: 100%;
+    }
+
+    .preview .upload-preview-tip {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        margin-top: 30px;
+        width: 196px;
+        text-align: center;
+        color: #bbbbbb;
+        font-size: 12px;
+        z-index: 2;
+    }
+
+    .preview img {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 72px;
+        display: block;
+        z-index: 3;
+    }
+
+    .row {
+        display: flex;
+    }
+
+    .submit-btn {
+        padding: 0;
+        height: 32px;
+        line-height: 32px;
+        width: 66px;
+        border-radius: 16px;
+        font-size: 13px;
+        color: #fff;
+        background-color: #3399ff;
+        border: 1px solid #3399ff;
+    }
+</style>
+
+<div id="container" style="overflow-y: auto;">
+    <h2 class="page-header" style="font-size: 18px;color: #555555;">版权设置</h2>
+    <div style="display: flex;">
+        <div class="back" onclick="window.location.href=`{:url('manager/index/index')}`">
+            <img src="__image__/admin/B/back-system.png" alt="">
+            <div>返回超级管理</div>
+        </div>  
+    </div>
+    <form method="post" return="" action="" class="auto-form">
+        <div class="add-form-body">
+            <div class="form-group row" style="height: 120px;">
+                <label class="col-sm-3 col-form-label">LOGO图片URL</label>
+                <div class="form-input">
+                    <div class="input-group mb-2">
+                        <input class="form-control " value="" name="logo">
+                        <span class="input-group-btn upload">
+                            <a class="btn btn-secondary upload-btn" href="javascript:">上传图片</a>
+                        </span>
+                    </div>
+                    <div class="preview">
+                        <span class="upload-preview-tip">建议尺寸98&times;36</span>
+                            <img src="" class="logo-preview">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-3 col-form-label">底部版权信息</label>
+                <div class="form-input">
+                    <input class="form-control" style="width: 579px;" value="" name="copyright">
+                </div>
+            </div>
+            <div class="form-group row form-submit">
+                <label class="col-sm-3 col-form-label"></label>
+                <a class="btn btn-primary submit-btn" href="javascript:">保存</a>
+            </div>
+        </div>  
+    </form>
+</div>
+<script>
+    $('.upload-btn').plupload({
+        url: "{:url('upload/image')}",
+        success: function (e, res, status) {
+            res = JSON.parse(res);
+            if (res.code == 0) {
+                $('input[name=logo]').val(res.data.url);
+                $('.logo-preview').attr('src', res.data.url);
+            } else {
+                $.myToast({
+                    content: res.msg,
+                });
+            }
+        },
+    });
+</script>
+
+
+
+{include file="../application/admin/view/public/footer.html"/}

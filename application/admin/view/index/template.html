@@ -1,0 +1,218 @@
+{include file="public/header"/}
+<style>
+    #container{
+        padding: 0;
+    }
+    #layui-container{
+        margin: 40px 0 0 40px;
+    }
+    .page-header{
+        padding-bottom: 10px;
+        border-bottom: 0;
+    }
+
+    #layui-container .back{
+        height: 32px;
+        width: 110px;
+        line-height: 32px;
+        text-align: center;
+        font-size: 13px;
+        color: #555555;
+        border: 1px solid #e5e3e9;
+        border-radius: 16px;
+        margin-top: -10px;
+    }
+
+    #layui-container .back .img{
+        width: 16px;
+        height: 16px;
+        margin: 6px 0 0 16px;
+        float: left;
+        background: url("__image__/admin/B/back-system.png");
+    }
+
+    .layui-form{
+        margin-top: 20px;
+    }
+
+    .layui-form-item{
+        margin-bottom: 24px;
+    }
+
+    .layui-form-item .layui-form-label{
+        font-size: 14px;
+        padding: 10px;
+        color: #999999;
+        width: 166px;
+    }
+
+    .layui-form-item .layui-input-block{
+        margin-left:188px;
+        width: 1000px;
+    }
+
+    .layui-form-item .layui-input-block input{
+        color: #555555;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+    
+    input::-webkit-input-placeholder {
+        color: #dddddd;
+        font-size:14px;
+    }
+
+    input:-moz-placeholder {
+        /* Mozilla Firefox 4 to 18 */
+        color: #dddddd;
+        font-size:14px;
+    }
+    input::-moz-placeholder {
+        /* Mozilla Firefox 19+ */
+        color: #dddddd;
+        font-size:14px;
+    }
+    input:-ms-input-placeholder {
+        /* Internet Explorer 10+ */
+        color: #dddddd;
+        font-size:14px;
+    }
+    button.keep{
+        width: 66px;
+        height: 36px;
+        color: #ffffff;
+        font-size: 13px;
+        background-color: #3399ff;
+        border-radius: 16px;
+    }
+
+    button.reset{
+        width: 66px;
+        height: 36px;
+        color: #555555;
+        font-size: 13px;
+        background-color: #f7f7f7;
+        border-radius: 16px;
+        border:0;
+    }
+</style>
+
+<div id="container" style="padding-bottom: 42px">
+
+    <div id="layui-container">
+        <h2 class="page-header" style="font-size: 18px;color: #555555;"> 公众号与模板消息设置</h2>
+        <a href="{:url('admin/index/set')}">
+            <div class="back">
+                <i class="img"></i>
+                <span>返回设置</span>
+            </div>
+        </a>
+
+        <form class="layui-form" action="">
+            <div class="layui-form-item">
+                <label class="layui-form-label">公众号AppId</label>
+                <div class="layui-input-block">
+                    <input type="text" name="app_id" placeholder="请输入公众号AppId"
+                           autocomplete="off" class="layui-input" value="{$template['app_id']}">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">公众号AppSecret</label>
+                <div class="layui-input-block">
+                    <input type="text" name="app_secret" placeholder="请输入公众号AppSecret"
+                           autocomplete="off" class="layui-input" value="{$template['app_secret']}">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">新访客提醒模板消息ID</label>
+                <div class="layui-input-block">
+                    <input type="text" name="visitor_tpl" placeholder="新访客提醒模板消息ID"
+                           autocomplete="off" class="layui-input" value="{$template['visitor_tpl']}">
+                </div>
+                <div style="color: #636c72;position:absolute;left: 235px;padding-top: 5px">模板编号: OPENTM416331462 <a onclick="tpl('visitor_tpl')" href="#" style="color: #0275d8;">查看模板消息格式</a></div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">新消息提醒模板消息ID</label>
+                <div class="layui-input-block">
+                    <input type="text" name="msg_tpl"  placeholder="新消息提醒模板消息ID"
+                           autocomplete="off" class="layui-input" value="{$template['msg_tpl']}">
+                </div>
+                <div style="color: #636c72;position:absolute;left: 235px;padding-top: 5px">模板编号: OPENTM202119578 <a onclick="tpl('msg_tpl')" href="#" style="color: #0275d8;">查看模板消息格式</a>
+                    </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">客服回复模板消息ID</label>
+                <div class="layui-input-block">
+                    <input type="text" name="customer_tpl"  placeholder="客服回复提醒模板消息ID"
+                           autocomplete="off" class="layui-input" value="{$template['customer_tpl']}">
+                </div>
+                <div style="color: #636c72;position:absolute;left: 235px;padding-top: 5px">模板编号: OPENTM412819869 <a onclick="tpl('customer_tpl')" href="#" style="color: #0275d8;">查看模板消息格式</a>
+                    此模板消息仅用于微信公众号链接，已关注该公众号并已授权登录的用户</div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">描述</label>
+                <div class="layui-input-block">
+                    <input type="text" name="desc" placeholder="请输入描述" autocomplete="off" class="layui-input"
+                           value="{$template['desc']}">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn keep" lay-submit lay-filter="template">保存</button>
+                    <button type="reset" class="layui-btn layui-btn-primary reset">重置</button>
+                </div>
+            </div>
+        </form>
+
+        <script>
+            layui.use('form', function () {
+                var form = layui.form;
+                //监听提交
+                form.on('submit(template)', function (data) {
+                    $.post("{:url('template')}", data.field, function (res) {
+                        if (res.code == 0) {
+                            layer.msg(res.msg, {
+                                icon: 1, end: function () {
+                                    location.reload();
+                                }
+                            });
+                        } else {
+                            layer.msg(res.msg, {
+                                icon: 2, end: function () {
+                                    location.reload();
+                                }
+                            });
+                        }
+                    });
+
+                    return false;
+                });
+            });
+
+            function tpl(name)
+            {
+                layer.open({
+                    type: 2,
+                    skin:"tablist",
+                    title:"教程",
+                    area: ['1020px', '800px'],
+                    content: HJWEB_ROOT_URL + '/assets/images/admin/'+name+'.png'
+                });
+            }
+        </script>
+    </div>
+</div>
+
+<script>
+
+
+</script>
+
+
+{include file="public/footer"/}

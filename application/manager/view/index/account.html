@@ -1,0 +1,156 @@
+{include file="../application/admin/view/public/header.html"/}
+
+<style>
+    .back {
+        height: 32px;
+        line-height: 32px;
+        border-radius: 16px;
+        border: 1px solid #E5E3E9;
+        width: 130px;
+        cursor: pointer;
+        margin-right: 20px;
+    }
+
+    .back img {
+        float: left;
+        display: block;
+        margin: 7px;
+        margin-left: 16px;
+    }
+
+    .search {
+        cursor: pointer;
+        position: relative;
+        width: 200px;
+    }
+
+    .search input {
+        height: 32px;
+        line-height: 32px;
+        border-radius: 16px;
+        border: 1px solid #E5E3E9;
+        width: 200px;
+        padding: 0 35px 0 15px;
+    }
+
+    .search img {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        right: 15px;
+        top: 9px;
+    }
+
+    .table {
+        width: 100%;
+        font-size: 13px;
+    }
+
+    .table>thead>tr>th {
+        height: 45px;
+        line-height: 45px;
+        background-color: #F7F7F7;
+        padding: 0 40px;
+        border: 0;
+    }
+
+    .table>tbody>tr>td {
+        height: 50px;
+        line-height: 50px;
+        padding: 0 40px;
+        border: 0;
+        border-bottom: 1px solid #F7F7F7;
+    }
+
+    .checkbox-item input[type='checkbox'] {
+        width: 16px;
+        height: 16px;
+        background-color: #fff;
+        background: url("__image__/admin/none.png") no-repeat center;
+        font-size: 12px;
+        display: inline-block;
+        border: 0;
+        position: relative;
+        top: 7px;
+        -webkit-appearance:none;
+        outline: none;
+    }
+
+    .checkbox-item input[type=checkbox]:checked{
+       background: url("__image__/admin/over.png") no-repeat center;
+    }
+</style>
+
+<div id="container" style="overflow-y: auto;">
+    <h2 class="page-header" style="font-size: 18px;color: #555555;">账户列表</h2>
+    <div style="display: flex;">
+        <div class="back" onclick="window.location.href=`{:url('manager/index/index')}`">
+            <img src="__image__/admin/B/back-system.png" alt="">
+            <div>返回超级管理</div>
+        </div>
+        <div class="search">
+            <input type="text" placeholder="请输入">
+            <img src="__image__/mobile/search.png" alt="">
+        </div>        
+    </div>
+    <table class="layui-table table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>账户</th>
+            <th>权限设置</th>
+          </tr>
+        </thead>
+        <col style="width: 15%;">
+        <col style="width: 35%;">
+        <tbody>
+          <tr>
+            <td>310</td>
+            <td>wsw18520537972</td>
+            <td>
+                <div class="checkbox-item">
+                    <input class="checkbox" name="group" value="1" type="checkbox">
+                    <span style="margin-left: 5px;">版权设置</span>
+                </div>
+            </td>
+          </tr>
+          <tr>
+            <td>310</td>
+            <td>wsw18520537972</td>
+            <td>
+                <div class="checkbox-item">
+                    <input class="checkbox" name="group" value="0" type="checkbox">
+                    <span style="margin-left: 5px;">版权设置</span>
+                </div>
+            </td>
+          </tr>
+          <tr>
+            <td>310</td>
+            <td>wsw18520537972</td>
+            <td>
+                <div class="checkbox-item">
+                    <input class="checkbox" name="group" value="0" type="checkbox">
+                    <span style="margin-left: 5px;">版权设置</span>
+                </div>
+            </td>
+          </tr>
+          <tr>
+            <td>310</td>
+            <td>wsw18520537972</td>
+            <td>
+                <div class="checkbox-item">
+                    <input class="checkbox" name="group" value="0" type="checkbox">
+                    <span style="margin-left: 5px;">版权设置</span>
+                </div>
+            </td>
+          </tr>
+        </tbody>
+    </table>
+</div>
+<script>
+
+</script>
+
+
+
+{include file="../application/admin/view/public/footer.html"/}

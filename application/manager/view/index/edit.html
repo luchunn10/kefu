@@ -1,0 +1,314 @@
+{include file="../application/admin/view/public/header.html"/}
+
+{/* 载入框架&插件CSS */}
+{load href="__style__/platform/bootstrap.min.css"/}
+<script>var _upload_url = "{:url('upload/file')}";</script>
+{load href="__script__/platform/vue.js"/}
+{load href="__script__/platform/jquery.min.js"/}
+{load href="__script__/platform/popper.min.js"/}
+{load href="__script__/platform/bootstrap.min.js"/}
+{load href="__script__/platform/common.js"/}
+{load href="__script__/platform/common.v2.js"/}
+{load href="__script__/platform/plupload.full.min.js"/}
+{load href="__libs__/jquery/jquery.form.min.js"/}
+
+<link href="__style__/jquery.datetimepicker.min.css" rel="stylesheet">
+<style>
+    body{
+        background-color: #000;
+    }
+    form {
+        position: relative;
+    }
+
+    .form-disable {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, .75);
+        z-index: 10;
+        text-align: center;
+        padding: 50px 0;
+    }
+
+    .form-disable .alert {
+        display: table;
+        margin: 0 auto;
+    }
+
+    .form-control:disabled, .form-control[readonly] {
+        opacity: .5;
+    }
+    .handler .back .img{
+        width: 16px;
+        height: 16px;
+        margin: 6px 0 0 16px;
+        float: left;
+        background: url("__image__/admin/B/back-system.png");
+    }
+    .card{
+        border: none;
+    }
+    .upload-btn{
+        color: white!important;
+        background-color: #1E9FFF;
+    }
+    .upload-btn:focus{outline:0 !important;border: none !important;}
+
+    .btn:hover , .btn:focus{
+        color: white;
+    }
+
+    .submit-form{
+        width: 66px;
+        height: 32px;
+        color: #ffffff;
+        font-size: 13px;
+        background-color: #3399ff;
+        border-radius: 16px;
+    }
+    .col-form-label{
+        font-size: 14px;
+        padding: 10px;
+        color: #999999;
+        width: 166px;
+        font-weight: 400;
+    }
+    .form-group{
+        margin-bottom: 24px;
+    }
+    .form-group div input{
+        color: #555555;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+    input::-webkit-input-placeholder {
+        color: #dddddd;
+        font-size:14px;
+    }
+
+    input:-moz-placeholder {
+        /* Mozilla Firefox 4 to 18 */
+        color: #dddddd;
+        font-size:14px;
+    }
+    input::-moz-placeholder {
+        /* Mozilla Firefox 19+ */
+        color: #dddddd;
+        font-size:14px;
+    }
+    input:-ms-input-placeholder {
+        /* Internet Explorer 10+ */
+        color: #dddddd;
+        font-size:14px;
+    }
+    .layui-layer-btn0{
+        color: white!important;
+    }
+    a .profile {
+        color: #858684 !important;
+    }
+</style>
+
+<div id="container" style="overflow-y: auto;">
+    <h2 class="page-header" style="font-size: 18px;color: #555555;"> 编辑客服系统</h2>
+    <div class="handler">
+        <a href="{:url('manager/index/index')}">
+            <div class="back">
+                <i class="img"></i>
+                <span>返回管理</span>
+            </div>
+        </a>
+    </div>
+    <form id="edit-form" method="post" class="auto-form card" style="padding-top: 50px">
+        <div class="card-body">
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label required">客服系统名称</label>
+                <div class="col-sm-6">
+                    <input type="text"class="form-control " name="business_name"
+                           value="{$model['business_name']}">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label required">客服数量限制</label>
+                <div class="col-sm-6">
+                    {if condition="isset($model['id'])"}
+                    <input type="number" class="form-control "
+                           value="{$model->max_count}"  name="max_count" class="form-control-plaintext ">
+                    <div class="fs-sm text-muted">此客服系统站点可以创建客服的数量，填写0则表示不限制用户创建客服的数量</div>
+                    {else/}
+                    <input type="number"class="form-control " name="max_count"
+                           value="">
+                    <div class="fs-sm text-muted">此客服系统站点可以创建客服的数量，填写0则表示不限制用户创建客服的数量</div>
+                    {/if}
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label required">管理员用户名</label>
+                <div class="col-sm-6">
+                    {if condition="isset($model->id)"}
+                    <input class="form-control "
+                           value="{$model->service->user_name}" readonly class="form-control-plaintext ">
+                    {else/}
+                    <input type="text"class="form-control " name="user_name"
+                           value="">
+                    {/if}
+                </div>
+            </div>
+            <input type="hidden" name="admin_id" value="{$model['admin_id']}">
+
+            {if condition="!isset($model['id'])"}
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label required">登录密码</label>
+                <div class="col-sm-6">
+                    <input type="password" class="form-control " value="" name="password">
+                </div>
+            </div>
+            {/if}
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Logo图片URL</label>
+                <div class="col-sm-6">
+                    <div class="input-group mb-2">
+                        <input class="form-control" value="{$model['logo']}" name="logo">
+                        <span class="input-group-btn">
+                        <a class="btn btn-secondary upload-btn" href="javascript:">上传图片</a>
+                    </span>
+                    </div>
+                    <span class="upload-preview-tip">98&times;36</span>
+                    <div style="display: inline-block;background: #fff;border: 1px solid #e3e3e3">
+                        <img src="{$model['logo']}" class="logo-preview"
+                             style="height: 50px;width: auto;display: inline-block">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">底部版权信息</label>
+                <div class="col-sm-6">
+                    {if condition="isset($model['id'])"}
+                    <input class="form-control " value="{$model['copyright']}" name="copyright">
+                    {else/}
+                    <input class="form-control " value="" name="copyright">
+                    {/if}
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">备注</label>
+                <div class="col-sm-6">
+                    {if condition="isset($model['id'])"}
+                    <input class="form-control " value="{$model['remark']}" name="remark">
+                    {else/}
+                    <input class="form-control " value="" name="remark">
+                    {/if}
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label required">客服系统有效期</label>
+                <div class="col-sm-6">
+                    <div class="form-inline">
+                        {if condition="isset($model->id) && $model->id == 1"}
+                        <input type="hidden" name="no_expire_time" value="on">
+                        <div class="text-muted" style="padding-top: calc(.5rem - 1px * 2);">总管理员账户此项无法修改</div>
+                        {else/}
+                        <input id="expire_time" class="form-control" value="{:date('Y-m-d', $model['expire_time'])}"
+                               name="expire_time" {$model['expire_time'] ? null : 'readonly'}>
+
+                        <label class="custom-control custom-checkbox ml-3">
+                            <input {$model['expire_time'] ? null: 'checked' }
+                            type="checkbox"
+                            name="no_expire_time"
+                            class="custom-control-input no-expire-time">
+                            <span class="custom-control-indicator"></span>
+                            <span class="custom-control-description">永久</span>
+                        </label>
+                        {/if}
+
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2"></label>
+                <div class="col-sm-6 offset-sm-3">
+                    <a class="btn btn-primary submit-form" href="javascript:">保存</a>
+                </div>
+            </div>
+        </div>
+    </form>
+    <script src="__script__/jquery.datetimepicker.full.min.js"></script>
+    <script>
+        $(".submit-form").click(function(e){
+            var form = $('#edit-form');
+            $.ajax({
+                url: form.attr('action') || '',
+                type: form.attr('method') || 'get',
+                dataType: 'json',
+                data: form.serialize(),
+                success: function (res) {
+                    if (res.code == 0) {
+                        layer.msg(res.msg, {
+                            icon: 1, end: function () {
+                                location.reload();
+                            }
+                        });
+                    }
+                    if (res.code == 1) {
+                        btn.btnReset();
+                        layer.msg(res.msg, {
+                            icon: 2, end: function () {
+                                location.reload();
+                            }
+                        });
+                    }
+                },
+                error: function (e) {
+                    btn.btnReset();
+                    layer.msg(res.msg, {
+                        icon: 2, end: function () {
+                            location.reload();
+                        }
+                    });
+                }
+            });
+        });
+
+        $('.upload-btn').plupload({
+            url: "{:url('platform/upload/image')}",
+            success: function (e, res, status) {
+                res = JSON.parse(res);
+                if (res.code == 0) {
+                    $('input[name=logo]').val(res.data.url);
+                    $('.logo-preview').attr('src', res.data.url);
+                } else {
+                    $.alert({
+                        content: res.msg,
+                    });
+                }
+            },
+        });
+
+        $.datetimepicker.setLocale('zh');
+
+        $('#expire_time').datetimepicker({
+            timepicker: false,
+            format: 'Y-m-d',
+            minDate: '<?=date('Y-m-d')?>',
+        });
+
+        $(document).on('change', '.no-expire-time', function () {
+            if ($(this).prop('checked')) {
+                $('#expire_time').prop('readonly', true);
+            } else {
+                $('#expire_time').prop('readonly', false);
+            }
+        });
+
+    </script>
+</div>
+{include file="../application/admin/view/public/footer.html"/}

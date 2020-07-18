@@ -1,0 +1,60 @@
+{include file="../application/admin/view/public/header.html"/}
+
+<style>
+    .list {
+        display: flex;
+        padding-left: 20px;
+    }
+
+    .item {
+        height: 120px;
+        width: 120px;
+        background-color: #F7F7F7;
+        border-radius: 10px;
+        text-align: center;
+        margin-left: 20px;
+        padding-top: 20px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    .item img {
+        height: 50px;
+        width: 50px;
+        margin-bottom: 15px;
+    }
+
+    .item:hover {
+        background-color: #fff;
+        box-shadow: 0 0 8px 2px rgba(0, 0, 0, .1)
+    }
+</style>
+
+<div id="container" style="overflow-y: auto;">
+    <h2 class="page-header" style="font-size: 18px;color: #555555;">超级管理</h2>
+    <div class="list">
+        <div class="item" onclick="window.location.href=`{:url('manager/index/account')}`">
+            <img src="__image__/manager/account.png" alt="">
+            <div>账户列表</div>
+        </div>
+        <div class="item" onclick="window.location.href=`{:url('manager/index/application')}`">
+            <img src="__image__/manager/application.png" alt="">
+            <div>应用列表</div>
+        </div>
+        <div class="item" onclick="window.location.href=`{:url('manager/index/setting')}`">
+            <img src="__image__/admin/B/general-setting.png" alt="">
+            <div>版权设置</div>
+        </div>
+        <div class="item" onclick="window.location.href=`{:url('manager/index/clean')}`">
+            <img src="__image__/manager/clean.png" alt="">
+            <div>清理缓存</div>
+        </div>
+    </div>
+</div>
+<script>
+
+</script>
+
+
+
+{include file="../application/admin/view/public/footer.html"/}

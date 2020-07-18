@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>客服系统</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Language" content="zh-CN">
+    <link rel="shortcut icon" href="/cgwl.ico"/>
+    {/* 载入框架&插件CSS */}
+    {load href="__libs__/layer/skin/layer.css"/}
+    {load href="__libs__/amaze/css/amazeui.min.css"/}
+
+    {/* 载入框架&插件JS */}
+    {load href="__libs__/jquery/jquery.min.js"/}
+    {load href="__libs__/jquery/jquery.form.min.js"/}
+    {load href="__libs__/jquery/jquery.cookie.js"/}
+    {load href="__libs__/layer/layer.js"/}
+    {load href="__libs__/amaze/js/amazeui.min.js"/}
+    {load href="__libs__/layui/layui.js"/}
+    {load href="__libs__/layui/css/layui.css"/}
+    {load href="__libs__/bootstrap/bootstrap.min.css"/}
+    {/* 载入项目 CSS & JS */}
+    {load href="__style__/admin/common.css"/}
+    {load href="__style__/admin/reload.css"/}
+    {load href="__script__/admin/functions.js"/}
+    {load href="__style__/admin/index.css"/}
+    {load href="__style__/admin/index_me.css"/}
+    {load href="__script__/admin/common_me.js"/}
+    {load href="__libs__/push/pusher.min.js"/}
+
+
+    {/* 载入框架&插件CSS */}
+    {load href="__style__/platform/bootstrap.min.css"/}
+    {load href="__style__/platform/common.css"/}
+    {load href="__style__/platform/common.v2.css"/}
+    {load href="__style__/platform/flex.css"/}
+
+    <script>var _upload_url = "{:url('upload/file')}";</script>
+    {load href="__script__/platform/vue.js"/}
+    {load href="__script__/platform/jquery.min.js"/}
+    {load href="__script__/platform/popper.min.js"/}
+    {load href="__script__/platform/bootstrap.min.js"/}
+    {load href="__script__/platform/common.js"/}
+    {load href="__script__/platform/common.v2.js"/}
+    {load href="__script__/platform/plupload.full.min.js"/}
+
+</head>
+<style type="text/css">
+
+    #group-menus-main li{
+        display: block;
+        width: 100%;
+        height: 45px;
+        line-height: 20px;
+    }
+
+    a:hover {
+        text-decoration: none;
+        color: #858684;
+    }
+
+    a {
+        color: #858684;
+    }
+    .info{
+        position: absolute;
+        left:40%;
+    }
+
+    #notices-icon{
+        display: inline-block;
+        width: 15px;
+        height: 15px;
+        background: url("__image__/admin/notice.png") no-repeat;
+        background-size:100%;
+        position: absolute;
+        left:30px;
+        top: 8px;
+        z-index: 9990;
+    }
+
+</style>
+<body>
+
+
+
+<div id="layout-west" >
+    <div id="layout-menus">
+        <div id="layout-menus-info">
+            <a class="" href="javascript:;">
+                <img src="__image__/index/workerman_logo.png" alt="..." class="am-circle" width="35px" height="35px">
+                <span class="info hide" style="color: #fff;font-weight: bold;font-size: 16px;margin-top:10px;">超级管理</span>
+            </a>
+
+        </div>
+
+        <div id="layout-menus-lists">
+
+            <ul id="group-menus-main" class="group-menus am-list ">
+                {if $title == '首页'}
+                 <li class="menu-item" id="title1" onmouseover="showpage(this)" name="首页" style="background: #13292B;">
+                    <a  href="{:url('manager/index/index')}" >
+                        <i class="menus-icon am-icon-home am-icon-sm"></i><span class="info hide">首页</span>
+                    </a>
+                </li>
+                {else}
+                <li class="menu-item" id="title1" onmouseover="showpage(this)" name="首页">
+                    <a  href="{:url('manager/index/index')}" >
+                        <i class="menus-icon am-icon-home am-icon-sm"></i><span class="info hide">首页</span>
+                    </a>
+                </li>
+
+                {/if}
+
+            </ul>
+        </div>
+    </div>
+
+    <div class="west_foot1" style="width:100%;height:40px;position: absolute;bottom: 0px;background: #13292B;text-align: center;line-height: 40px;">
+        <a href="javascript:changeall()" >
+            <i class="menus-icon am-icon-align-justify am-icon-sm"></i>
+        </a>
+    </div>
+    <div class="west_foot2 hide" style="width:100%;height:40px;position: absolute;bottom: 0px;background: #13292B;text-align: center;line-height: 40px;">
+        <a href="javascript:changesmall()" >
+            <i class="menus-icon am-icon-align-justify am-icon-sm"></i>
+        </a>
+    </div>
+</div>
+
+<script type="text/javascript">
+   
+    function showpage(obj){
+            var value =$(obj).attr("name");
+            var key =$(obj).attr("id");
+            layer.tips(value, '#'+key,{tips: [4, '#2F4050']});
+        }
+
+    var width =document.body.clientWidth;
+
+    var changeall =function(){
+        $("#layout-west").css("width","130px");
+        $("#layout-center").css({"position":"absolute","left":"130px","width":(width-130)+"px"});
+        $(".info").removeClass("hide");
+        $(".west_foot2").removeClass("hide");
+        $(".west_foot1").addClass("hide");
+    }
+    var changesmall =function(){
+        $("#layout-west").css("width","55px");
+        $("#layout-center").css({"position":"absolute","left":"55px","width":(width-55)+"px"});
+        $(".info").addClass("hide");
+        $(".west_foot2").addClass("hide");
+        $(".west_foot1").removeClass("hide");
+    }
+
+    window.onresize = function(){
+        $("#layout-west").css("width","55px");
+        $("#layout-center").css("width",(width-55)+"px");
+    }
+
+</script>
+
+<div id="layout-center">
+    <div id="layout-north">
+        <a id="layout-logo">&nbsp; 超级管理平台</a>
+        <ul id="layout-tools" class="am-nav am-nav-pills">
+            <li style="width: 100%;height: 25px">
+                <div class="am-dropdown " data-am-dropdown>
+                    <a class="am-dropdown-toggle" href="javascript:;" data-am-dropdown-toggle>
+                        <img  id="se_avatar" src="{$arr['avatar']}" alt="..." class="am-circle" width="40px" height="40px">
+                        <span class="handle" id="se"> {$arr['nick_name']} </span>
+                        <span id="channel" style="display: none;"></span>
+                        <span id="customer" style="display: none;"></span>
+                        <span class="profile">在线<i class="am-icon-caret-down"></i></span>
+
+                    </a>
+
+                    <ul class="am-dropdown-content">
+                    
+                      
+                        <li>
+                            <a href="{:url('admin/index/index')}" class="safe-exit">
+                                <i class="am-icon-power-off"></i> 返回
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+    </div>
+

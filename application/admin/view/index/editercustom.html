@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>editerTab</title>
+
+    <script>
+        HJWEB_ROOT_URL = '{:request()->root()}';
+    </script>
+    {load href="__libs__/jquery/jquery.min.js"/}
+    {load href="__libs__/amaze/css/amazeui.min.css"/}
+    {load href="__libs__/amaze/js/amazeui.min.js"/}
+    {load href="__libs__/layer/layer.js"/}
+    {load href="__libs__/layui/layui.js"/}
+    {load href="__libs__/layui/css/layui.css"/}
+
+    <link rel="stylesheet" href="__libs__/myeditor/css/editormd.css" />
+</head>
+<script src='__libs__/myeditor/editormd.js'></script>
+<script src="__libs__/myeditor/lib/marked.min.js"></script>
+<script src="__libs__/myeditor/lib/prettify.min.js"></script>
+<script src="__libs__/myeditor/lib/raphael.min.js"></script>
+<script src="__libs__/myeditor/lib/underscore.min.js"></script>
+<script src="__libs__/myeditor/lib/sequence-diagram.min.js"></script>
+<script src="__libs__/myeditor/lib/flowchart.min.js"></script>
+
+
+<style type="text/css">
+    *{
+        margin: 0;
+        padding: 0;
+    }
+    #tab_title {
+        font-size: 13px;
+        color: #555555;
+        border: 1px solid #e5e3e9;
+        border-radius: 8px;
+    }
+    button.keep {
+        width: 66px;
+        height: 36px;
+        color: #ffffff;
+        font-size: 13px;
+        background-color: #3399ff;
+        border-radius: 16px;
+    }
+
+    button.reset {
+        width: 66px;
+        height: 36px;
+        color: #555555;
+        font-size: 13px;
+        background-color: #f7f7f7;
+        border-radius: 16px;
+        border: 0;
+    }
+</style>
+<body>
+
+<div style="width: 90%;margin: 10px auto;">
+    <div class="layui-form-item layui-form-text">
+        <div class="layui-input-block" style="margin-left:20px;">
+            <textarea id="custom" placeholder="请输入内容" class="layui-textarea" style="width:100%;height: 160px;border: 1px solid #e5e3e9;border-radius: 8px;resize:none;">{$content}</textarea>
+        </div>
+    </div>
+
+    <div class="layui-form-item" style="margin-top: 24px;text-align: center">
+        <button class="layui-btn keep" onclick="setcustom()" lay-submit lay-filter=" template">保存</button>
+        <button type="reset" onclick="reset()" class="layui-btn layui-btn-primary reset">取消</button>
+    </div>
+</div>
+
+
+</body>
+
+<script>
+    var lock = false;
+    function setcustom() {
+        var content=$("#custom").val();
+
+        var id ={$sid};
+
+        if(content){
+            if (!lock) {
+                lock = true;
+                $.ajax({
+                    url:HJWEB_ROOT_URL+'/admin/set/setcustom',
+                    type:'post',
+                    data:{content:content,sid:id},
+                    success:function(res){
+
+                        if(res.code == 0){
+                            layer.msg(res.msg,{icon:1,end:function(){
+                                    parent.location.reload();
+                                }})
+                        }else{
+                            layer.msg(res.msg,{iocn:2});
+                        }
+                    }
+                });
+            }
+        }else{
+            layer.msg('数据不完整',{iocn:2});
+        }
+    }
+
+    function reset(){
+        parent.layer.closeAll();
+    }
+</script>
+</html>
